@@ -178,12 +178,12 @@
 .guest-page .guest-music-note svg{color:var(--guest-accent)}
 .guest-page .guest-section-heading .section-eyebrow{color:var(--guest-quiet)}
 .guest-page .guest-tabs{border:1px solid var(--guest-line);border-radius:12px;background:#202020;overflow:hidden}
-.guest-page .guest-tabs button{color:var(--guest-muted);transition:background .2s ease-in-out,color .2s ease-in-out}
+.guest-page .guest-tabs button{color:var(--guest-muted);font-weight:700;transition:background .2s ease-in-out,color .2s ease-in-out}
 .guest-page .guest-tabs button.active{background:var(--guest-accent);color:#fff}
 .guest-page .guest-tabs button.active:after{display:none}
 .guest-page .menu-group-tabs button{border-color:#383838;background:#202020;color:#cbc7c3}
 .guest-page .menu-group-tabs button.active{border-color:var(--guest-accent);background:var(--guest-accent);color:#fff}
-.guest-page .category-tabs button{border-color:#383838;background:#202020;color:#cbc7c3}
+.guest-page .category-tabs button{border-color:#383838;background:#202020;color:#cbc7c3;font-weight:700}
 .guest-page .category-tabs button.active{border-color:var(--guest-accent);background:#25211f;color:#fff}
 .guest-page .menu-item{border-color:#333;background:#202020}
 .guest-page .menu-thumb{position:relative;overflow:hidden;background-color:#2d2a27;color:#aaa39b}
@@ -650,3 +650,6 @@ body:has(.customer-menu){min-width:0}
  .customer-menu .mobile-cart-action{font-size:11px}
  .customer-menu .mobile-cart-summary strong{font-size:12px}
 }
+
+/* Consistent bold labels across customer menu navigation. */
+.guest-page .menu-group-tabs button{font-weight:700}
