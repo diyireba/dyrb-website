@@ -14,6 +14,8 @@ DYRB is a Malaysian bar and bistro with table QR codes, a live singer, food and 
 
 ## Staff flow
 
+Orders are received here and entered into the venue POS by staff. Mark as completed means POS entry is finished, not payment or food preparation. `complete_order` and the service-only `complete_telegram_order` RPC lock each order and preserve the first completion actor/time. Existing internal `served` maps to Completed; payment fields are not used or changed. Telegram buttons require an active linked staff identity with `orders.manage` and the exact approved chat/topic/message. Completion edits the shared alert and removes the button. Durable outbox edits synchronize completion from either Telegram or the website, including notification/completion races.
+
 Staff use a unique assigned user ID and six-digit passcode; member phone/PIN credentials cannot enter the staff dashboard. `api/member-auth.ts` owns rate-limited credential verification for both flows, with separate internal identities and profile checks. `api/admin.ts` owns account creation. See `docs/LOGIN.md` for existing-account migration. No SMS or email verification is sent.
 
 Staff use individually assigned accounts. The dashboard shows only the sections their role can access. The singer works with song requests. Other service, order, menu, member, staff, table, and permission controls remain behind their corresponding permissions.

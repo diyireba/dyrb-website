@@ -10,7 +10,7 @@ For the DYRB staff group with **Customer Order**, **Song**, and **Customer Balan
 - `/songs` and `/orders` show the latest 10 open requests/active orders.
 - `/balance 0123456789` shows points, unexpired stored drinks and any separately labelled legacy beer balance. Both `members.lookup` and `members.adjust` are required, matching website balance access. Balance lookup is audited. Staff without balance access cannot use it.
 - `/whoami` shows only the sender's Telegram ID, for owner-approved linking. Unlinked people cannot read venue data.
-- Commands work privately, or in approved topics after the topic migration. This version does not approve songs, change order statuses or adjust balances; those actions remain in the staff website.
+- Commands work privately, or in approved topics after the topic migration. After the migration in `docs/ORDER-COMPLETION.md`, order alerts include a staff-authorized completion button for POS entry. Song approval and balance adjustments remain in the staff website.
 
 ## 1. Create the bot
 

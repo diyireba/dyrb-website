@@ -20,22 +20,38 @@ export function normalizeMemberPhone(value: string) {
   const phone = compact.startsWith('+') ? compact : compact.startsWith('60') ? `+${compact}` : compact.startsWith('0') ? `+60${compact.slice(1)}` : ''
   return /^\+[1-9]\d{7,14}$/.test(phone) ? phone : null
 }
-export async function sendTelegram(token: string, chatId: string, text: string, fetcher = fetch, threadId?: number) {
+async function telegramCall(token: string, method: string, body: any, fetcher = fetch) {
   let result: any
   try {
-    const response = await fetcher(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const response = await fetcher(`https://api.telegram.org/bot${token}/${method}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, ...(threadId ? { message_thread_id: threadId } : {}), text: text.slice(0, 3800), link_preview_options: { is_disabled: true } }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(6000),
     })
     result = await response.json()
+    if (method === 'editMessageText' && result.error_code === 400 && typeof result.description === 'string' && result.description.startsWith('Bad Request: message is not modified')) return null
     if (!response.ok || !result.ok) throw new TelegramError(`telegram_${result.error_code || response.status}`, Math.min(86400, Math.max(5, Number(result.parameters?.retry_after) || 60)))
   } catch (error) {
     // Never propagate fetch URLs or Telegram descriptions: the URL contains the bot token.
     if (error instanceof TelegramError) throw error
     throw new TelegramError('telegram_network')
   }
-  return result.result?.message_id
+  return result.result
+}
+export async function sendTelegram(token: string, chatId: string, text: string, fetcher = fetch, threadId?: number, replyMarkup?: any) {
+  const result = await telegramCall(token, 'sendMessage', { chat_id: chatId, ...(threadId ? { message_thread_id: threadId } : {}), text: text.slice(0, 3800), link_preview_options: { is_disabled: true }, ...(replyMarkup ? { reply_markup: replyMarkup } : {}) }, fetcher)
+  return result?.message_id
+}
+export function orderCompleted(order: any) { return order.status === 'served' }
+export function orderButtons(deliveryId: string, order: any) {
+  return { inline_keyboard: orderCompleted(order) || order.status === 'cancelled' ? [] : [[{ text: '✓ Mark as completed', callback_data: `done:${deliveryId}` }]] }
+}
+async function editOrderMessage(token: string, chatId: string, messageId: number, order: any, fetcher: any) {
+  return telegramCall(token, 'editMessageText', { chat_id: chatId, message_id: messageId, text: orderText(order).slice(0, 3800), reply_markup: { inline_keyboard: [] }, link_preview_options: { is_disabled: true } }, fetcher)
+}
+export function malaysiaOrderTime(value: any) {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? 'Date unavailable' : new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).format(date)
 }
 function checked(result: any) { if (result.error) throw new Error('database_unavailable'); return result.data }
 export async function staffAccess(db: any, telegramUserId: string) {
@@ -49,7 +65,7 @@ export async function staffAccess(db: any, telegramUserId: string) {
 export function orderText(order: any) {
   const items = order.order_items || []
   const total = items.reduce((sum: number, item: any) => sum + Number(item.unit_price) * item.quantity, 0)
-  return [`New order · Table ${order.table_code}`, `Order ${order.id}`, `Total RM ${total.toFixed(2)} · Pay at counter`, ...items.map((i: any) => `${i.quantity} × ${i.item_name} · RM ${(Number(i.unit_price) * i.quantity).toFixed(2)}`)].join('\n')
+  return [`${orderCompleted(order) ? '✓ Completed' : 'New Order'} Table ${order.table_code}`, `Order Date and Time: ${malaysiaOrderTime(order.created_at)} (MYT)`, '', ...items.map((i: any) => `${i.quantity} × ${i.item_name} · RM ${(Number(i.unit_price) * i.quantity).toFixed(2)}`), '', `Total RM ${total.toFixed(2)}`, ...(orderCompleted(order) ? ['', `Completed by ${order.completed_by_name || 'Staff'}${order.completed_at ? ` · ${malaysiaOrderTime(order.completed_at)} (MYT)` : ''}`, 'Entered into POS.'] : [])].join('\n')
 }
 export function songText(song: any) {
   return [`New song · Table ${song.table_code}`, song.title, song.artist ? `Artist: ${song.artist}` : '', song.dedication ? `Dedication: ${song.dedication}` : '', `Request ${song.id}`].filter(Boolean).join('\n')
@@ -81,7 +97,7 @@ export async function commandReply(db: any, userId: string, text: string) {
   if (command === '/orders') {
     if (!staff.can('orders.view')) return 'Your staff role cannot view orders.'
     const orders = checked(await db.from('orders').select('id,table_code,status,order_items(quantity,unit_price)').in('status', ['new', 'preparing', 'ready']).order('created_at', { ascending: false }).limit(10)) || []
-    return orders.length ? orders.map((o: any) => `Table ${o.table_code} · ${o.status} · RM ${(o.order_items || []).reduce((sum: number, i: any) => sum + i.quantity * Number(i.unit_price), 0).toFixed(2)} · ${o.id.slice(0, 8)}`).join('\n') : 'No active orders.'
+    return orders.length ? orders.map((o: any) => `Table ${o.table_code} · New · RM ${(o.order_items || []).reduce((sum: number, i: any) => sum + i.quantity * Number(i.unit_price), 0).toFixed(2)} · ${o.id.slice(0, 8)}`).join('\n') : 'No active orders.'
   }
   return 'Unknown command. Use /help.'
 }
@@ -103,6 +119,40 @@ export function createWebhookHandler({ db, token, secret, fetcher = fetch, botUs
     let update: any
     try { update = parseBody(req.body) } catch { return res.status(400).json({ error: 'Invalid request.' }) }
     if (!Number.isSafeInteger(update.update_id) || update.update_id < 0) return res.status(400).json({ error: 'Invalid update.' })
+    if (update.callback_query) {
+      const callback = update.callback_query
+      if (typeof callback.id !== 'string' || !Number.isSafeInteger(callback.from?.id) || callback.from.id <= 0 || callback.from.is_bot || !/^done:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(callback.data || '')) return res.status(200).json({ ok: true })
+      const message = callback.message
+      if (!message || !Number.isSafeInteger(message.message_id) || !Number.isSafeInteger(message.chat?.id)) return res.status(200).json({ ok: true })
+      const userId = String(callback.from.id)
+      try {
+        const staff = await staffAccess(db, userId)
+        if (!staff?.can('orders.manage')) {
+          await telegramCall(token, 'answerCallbackQuery', { callback_query_id: callback.id, text: 'Link your active staff account with order-management permission first.', show_alert: true }, fetcher)
+          return res.status(200).json({ ok: true })
+        }
+        const original = checked(await db.from('telegram_outbox').select('id,kind,entity_id,topic_id,telegram_user_id,telegram_message_id,status').eq('id', callback.data.slice(5)).maybeSingle())
+        let validDestination = false
+        if (original?.topic_id && message.chat.type === 'supergroup') {
+          const topic = await approvedTopic(db, { id: original.topic_id })
+          validDestination = topic?.kind === 'order' && topic.chat_id === String(message.chat.id) && topic.thread_id === message.message_thread_id
+        } else if (original && message.chat.type === 'private') {
+          validDestination = original.telegram_user_id === userId && String(message.chat.id) === userId
+        }
+        if (!validDestination || original.kind !== 'order' || original.status !== 'sent' || Number(original.telegram_message_id) !== message.message_id) {
+          await telegramCall(token, 'answerCallbackQuery', { callback_query_id: callback.id, text: 'This order button is no longer available.', show_alert: true }, fetcher)
+          return res.status(200).json({ ok: true })
+        }
+        // The database repeats all identity/destination checks and locks the order for idempotent completion.
+        const completed = checked(await db.rpc('complete_telegram_order', { p_delivery_id: original.id, p_telegram_user_id: userId, p_chat_id: String(message.chat.id), p_thread_id: message.chat.type === 'supergroup' ? message.message_thread_id : null, p_message_id: message.message_id }))
+        const order = checked(await db.from('orders').select('*,order_items(item_name,quantity,unit_price)').eq('id', original.entity_id).maybeSingle())
+        if (order && orderCompleted(order)) await editOrderMessage(token, String(message.chat.id), message.message_id, order, fetcher)
+        await telegramCall(token, 'answerCallbackQuery', { callback_query_id: callback.id, text: completed.already_completed ? 'Already completed.' : 'Completed — entered into POS.' }, fetcher)
+        return res.status(200).json({ ok: true })
+      } catch {
+        return res.status(503).json({ error: 'Order completion temporarily unavailable.' })
+      }
+    }
     const message = update.message
     if (!message || !Number.isSafeInteger(message.from?.id) || message.from.id <= 0 || message.from.is_bot || message.sender_chat || message.forward_origin || typeof message.text !== 'string') return res.status(200).json({ ok: true })
     const isPrivate = message.chat?.type === 'private' && message.chat.id === message.from.id
@@ -170,21 +220,31 @@ export function createDispatchHandler({ db, token, secret, fetcher = fetch }: an
       for (const row of deliveries) {
         const finish = async (patch: any) => checked(await db.from('telegram_outbox').update({ ...patch, locked_until: null }).eq('id', row.id).eq('lease_id', row.lease_id))
         try {
-          const permission = row.kind === 'order' ? 'orders.view' : 'songs.view'
+          const isOrder = row.kind === 'order' || row.kind === 'order_completed'
+          const permission = isOrder ? 'orders.view' : 'songs.view'
           let chatId = row.telegram_user_id, threadId: number | undefined
           if (row.topic_id) {
             const topic = await approvedTopic(db, { id: row.topic_id })
-            if (!topic || topic.kind !== row.kind) { await finish({ status: 'skipped' }); continue }
+            if (!topic || topic.kind !== (isOrder ? 'order' : 'song')) { await finish({ status: 'skipped' }); continue }
             chatId = topic.chat_id; threadId = topic.thread_id
           } else {
             const staff = await staffAccess(db, row.telegram_user_id)
-            if (!staff || !staff.can(permission) || !(row.kind === 'order' ? staff.notify_orders : staff.notify_songs)) { await finish({ status: 'skipped' }); continue }
+            if (!staff || !staff.can(permission) || (row.kind !== 'order_completed' && !(isOrder ? staff.notify_orders : staff.notify_songs))) { await finish({ status: 'skipped' }); continue }
           }
-          const table = row.kind === 'order' ? 'orders' : 'song_requests'
-          const entity = checked(await db.from(table).select(row.kind === 'order' ? '*,order_items(item_name,quantity,unit_price)' : '*').eq('id', row.entity_id).maybeSingle())
+          const table = isOrder ? 'orders' : 'song_requests'
+          const entity = checked(await db.from(table).select(isOrder ? '*,order_items(item_name,quantity,unit_price)' : '*').eq('id', row.entity_id).maybeSingle())
           if (!entity) { await finish({ status: 'skipped' }); continue }
-          await sendTelegram(token, chatId, row.kind === 'order' ? orderText(entity) : songText(entity), fetcher, threadId)
-          await finish({ status: 'sent', sent_at: new Date().toISOString(), last_error_code: null })
+          if (row.kind === 'order_completed') {
+            let query = db.from('telegram_outbox').select('telegram_message_id').eq('kind', 'order').eq('entity_id', row.entity_id)
+            query = row.topic_id ? query.eq('topic_id', row.topic_id) : query.eq('telegram_user_id', row.telegram_user_id)
+            const original = checked(await query.maybeSingle())
+            if (!original?.telegram_message_id || !orderCompleted(entity)) { await finish({ status: 'skipped' }); continue }
+            await editOrderMessage(token, chatId, Number(original.telegram_message_id), entity, fetcher)
+            await finish({ status: 'sent', sent_at: new Date().toISOString(), last_error_code: null })
+          } else {
+            const messageId = await sendTelegram(token, chatId, isOrder ? orderText(entity) : songText(entity), fetcher, threadId, isOrder ? orderButtons(row.id, entity) : undefined)
+            await finish({ status: 'sent', sent_at: new Date().toISOString(), last_error_code: null, ...(isOrder ? { telegram_message_id: messageId } : {}) })
+          }
           sent++
         } catch (error) {
           const code = error instanceof TelegramError ? error.code : 'delivery_failed'

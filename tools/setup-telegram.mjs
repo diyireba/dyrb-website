@@ -23,7 +23,7 @@ async function api(method, body) {
 }
 try {
   const bot = await api('getMe', {})
-  await api('setWebhook', { url: `${origin}/api/telegram`, secret_token: secret, allowed_updates: ['message'], max_connections: 5, drop_pending_updates: false })
+  await api('setWebhook', { url: `${origin}/api/telegram`, secret_token: secret, allowed_updates: ['message', 'callback_query'], max_connections: 5, drop_pending_updates: false })
   await api('setMyCommands', { commands: [
     { command: 'start', description: 'Get your ID for staff linking' },
     { command: 'help', description: 'Show staff commands' },

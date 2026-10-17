@@ -20,7 +20,7 @@ const copy = {
     guestTitle: 'Order from your table', guestCopy: 'Browse the menu, request a song, or call our team.',
     table: 'TABLE', menuTitle: 'Browse the menu', menuCopy: 'Food and drinks, ordered from your table.',
     foodGroup: 'Food', beverageGroup: 'Beverages', food: 'Mains', bites: 'Side food', draught: 'Draught beer', bottle: 'Bottle beer', cocktails: 'Cocktails', mocktails: 'Mocktails', soft: 'Non-alcoholic', spirits: 'Whisky, brandy & gin', add: 'Add', cart: 'Your order', emptyCart: 'Add food or drinks to start your order.',
-    payCounter: 'Send order · pay at counter', subtotal: 'Subtotal', noCharge: 'No payment is collected online.',
+    payCounter: 'Send order', subtotal: 'Subtotal', noCharge: 'No payment is collected online.',
     requestSent: 'Order sent to the team', requestSong: 'Request a song', songCopy: 'Tell us what you would love to hear tonight.',
     songTitle: 'Song title', artist: 'Artist', dedication: 'Dedication (optional)', submitRequest: 'Send song request',
     requestNote: 'Every request is reviewed by the singer.', requestSuccess: 'Your request is with the singer.',
@@ -38,7 +38,7 @@ const copy = {
     pending: 'Pending', approved: 'Approved', singing: 'Singing', sung: 'Sung', rejected: 'Rejected',
     choose: 'Choose', approve: 'Approve', reject: 'Reject', markSung: 'Mark sung', startSong: 'Start song', delete: 'Delete', addSong: 'Add a song',
     title: 'Title', tableCol: 'Table', dedicationCol: 'Dedication', status: 'Status', action: 'Action',
-    freshOrders: 'Orders', ordersSub: 'Orders waiting for your team.', new: 'New', preparing: 'Preparing', ready: 'Ready', served: 'Served', paid: 'Paid', unpaid: 'Awaiting payment', markPreparing: 'Start preparing', markReady: 'Mark ready', markServed: 'Mark served', markPaid: 'Mark paid',
+    freshOrders: 'Orders', ordersSub: 'Enter each order into your POS, then mark it completed.', orderNew: 'New', orderCompleted: 'Completed', orderCancelled: 'Cancelled', markCompleted: 'Mark as completed', posOrderHelp: 'Mark completed after entering the order into your POS.', activeOrders: 'active orders', completedBy: 'Completed by', staffMember: 'Staff', new: 'New', preparing: 'Preparing', ready: 'Ready', served: 'Served', paid: 'Paid', unpaid: 'Awaiting payment', markPreparing: 'Start preparing', markReady: 'Mark ready', markServed: 'Mark served', markPaid: 'Mark paid',
     serviceTitle: 'Table requests', serviceSub: 'Requests from tables.', closeRequest: 'Mark done',
     memberDirectory: 'Member directory', memberSub: 'Look up guests and keep their benefits up to date.', searchMember: 'Search name or phone', enrollMember: 'Enroll member', adjustPoints: 'Points adjustment', adjustBeer: 'Beer servings', reason: 'Reason for adjustment', saveAdjustment: 'Save adjustment', addMember: 'Create member',
     fullName: 'Full name', newPin: 'Initial PIN', pointBalance: 'POINTS', beerCount: 'BEER', lookupOnly: 'Member details are view-only for this role.',
@@ -48,14 +48,14 @@ const copy = {
     tablesTitle: 'Table QR codes', tablesSub: 'Print a QR and place it on each table.', openQr: 'Open guest page',
     en: 'EN', bm: 'BM', house: 'MENU', unavailable: 'Currently unavailable',
     cancel: 'Cancel', save: 'Save', close: 'Close', loading: 'Loading…', noSongs: 'No requests here yet.', noOrders: 'All clear for now.', noService: 'No open requests.', noMembers: 'No members match that search.',
-    orderReceived: 'Order sent. Please pay at the counter when you are ready.', serviceReceived: 'The team has been notified.', singerAdded: 'Added to the queue.', demoReset: 'Demo data is saved in this browser.',
+    orderReceived: 'Order sent. Our team has been notified.', serviceReceived: 'The team has been notified.', singerAdded: 'Added to the queue.', demoReset: 'Demo data is saved in this browser.',
   },
   bm: {
     menu: 'Menu', songs: 'Lagu', member: 'Ahli', liveMusic: 'Muzik langsung setiap malam',
     guestTitle: 'Pesan terus dari meja anda', guestCopy: 'Lihat menu, minta lagu atau panggil staf.',
     table: 'MEJA', menuTitle: 'Lihat menu', menuCopy: 'Pilih makanan dan minuman dari meja anda.',
     foodGroup: 'Makanan', beverageGroup: 'Minuman', food: 'Hidangan utama', bites: 'Makanan sampingan', draught: 'Bir draf', bottle: 'Bir botol', cocktails: 'Koktel', mocktails: 'Mocktail', soft: 'Tanpa alkohol', spirits: 'Wiski, brendi & gin', add: 'Tambah', cart: 'Pesanan anda', emptyCart: 'Bakul anda masih kosong.',
-    payCounter: 'Hantar pesanan · bayar di kaunter', subtotal: 'Jumlah kecil', noCharge: 'Bayaran tidak dikutip dalam talian.',
+    payCounter: 'Hantar pesanan', subtotal: 'Jumlah kecil', noCharge: 'Bayaran tidak dikutip dalam talian.',
     requestSent: 'Pesanan dihantar kepada pasukan', requestSong: 'Minta lagu', songCopy: 'Beritahu lagu yang anda ingin dengar malam ini.',
     songTitle: 'Tajuk lagu', artist: 'Artis', dedication: 'Dedikasi (pilihan)', submitRequest: 'Hantar permintaan lagu',
     requestNote: 'Setiap permintaan akan disemak oleh penyanyi.', requestSuccess: 'Permintaan anda telah dihantar kepada penyanyi.',
@@ -73,7 +73,7 @@ const copy = {
     pending: 'Menunggu', approved: 'Diluluskan', singing: 'Sedang dimainkan', sung: 'Selesai', rejected: 'Ditolak',
     choose: 'Pilih', approve: 'Luluskan', reject: 'Tolak', markSung: 'Tandakan selesai', startSong: 'Mulakan lagu', delete: 'Padam', addSong: 'Tambah lagu',
     title: 'Tajuk', tableCol: 'Meja', dedicationCol: 'Dedikasi', status: 'Status', action: 'Tindakan',
-    freshOrders: 'Pesanan dari tetamu', ordersSub: 'Pesanan menunggu pasukan anda.', new: 'Baharu', preparing: 'Disediakan', ready: 'Sedia', served: 'Dihidangkan', paid: 'Dibayar', unpaid: 'Menunggu bayaran', markPreparing: 'Mula sediakan', markReady: 'Tandakan sedia', markServed: 'Tandakan dihidang', markPaid: 'Tandakan dibayar',
+    freshOrders: 'Pesanan dari tetamu', ordersSub: 'Masukkan pesanan ke dalam POS, kemudian tandakan selesai.', orderNew: 'Baharu', orderCompleted: 'Selesai', orderCancelled: 'Dibatalkan', markCompleted: 'Tandakan selesai', posOrderHelp: 'Tandakan selesai selepas memasukkan pesanan ke dalam POS.', activeOrders: 'pesanan aktif', completedBy: 'Diselesaikan oleh', staffMember: 'Staf', new: 'Baharu', preparing: 'Disediakan', ready: 'Sedia', served: 'Dihidangkan', paid: 'Dibayar', unpaid: 'Menunggu bayaran', markPreparing: 'Mula sediakan', markReady: 'Tandakan sedia', markServed: 'Tandakan dihidang', markPaid: 'Tandakan dibayar',
     serviceTitle: 'Permintaan tetamu', serviceSub: 'Permintaan daripada meja.', closeRequest: 'Tandakan selesai',
     memberDirectory: 'Senarai ahli', memberSub: 'Cari ahli dan kemas kini manfaat mereka.', searchMember: 'Cari nama atau telefon', enrollMember: 'Daftar ahli', adjustPoints: 'Pelarasan mata', adjustBeer: 'Hidangan bir', reason: 'Sebab pelarasan', saveAdjustment: 'Simpan pelarasan', addMember: 'Cipta ahli',
     fullName: 'Nama penuh', newPin: 'PIN awal', pointBalance: 'MATA', beerCount: 'BIR', lookupOnly: 'Maklumat ahli hanya boleh dilihat untuk peranan ini.',
@@ -83,16 +83,17 @@ const copy = {
     tablesTitle: 'Satu kod untuk setiap meja.', tablesSub: 'Cetak kod QR dan letakkan di setiap meja.', openQr: 'Buka halaman tetamu',
     en: 'EN', bm: 'BM', house: 'KEGEMARAN RUMAH', unavailable: 'Tidak tersedia buat masa ini',
     cancel: 'Batal', save: 'Simpan', close: 'Tutup', loading: 'Memuatkan…', noSongs: 'Belum ada permintaan.', noOrders: 'Tiada pesanan baharu.', noService: 'Tiada permintaan terbuka.', noMembers: 'Tiada ahli ditemui.',
-    orderReceived: 'Pesanan dihantar. Sila bayar di kaunter.', serviceReceived: 'Pasukan kami telah dimaklumkan.', singerAdded: 'Ditambah ke dalam senarai.', demoReset: 'Data demo disimpan dalam pelayar ini.',
+    orderReceived: 'Pesanan dihantar. Pasukan kami telah dimaklumkan.', serviceReceived: 'Pasukan kami telah dimaklumkan.', singerAdded: 'Ditambah ke dalam senarai.', demoReset: 'Data demo disimpan dalam pelayar ini.',
   },
 }
 
 const zhCopy = {
+  ordersSub: '将订单输入 POS 后标记完成。', orderNew: '新订单', orderCompleted: '已完成', orderCancelled: '已取消', markCompleted: '标记完成', posOrderHelp: '将订单输入 POS 后，请标记完成。', activeOrders: '笔待处理订单', completedBy: '完成人', staffMember: '店员',
   menu: '菜单', songs: '点歌', member: '会员', liveMusic: '每晚都有现场音乐',
   guestTitle: '在餐桌直接点餐', guestCopy: '浏览菜单、点歌，或联系店员。',
   table: '桌号', menuTitle: '浏览菜单', menuCopy: '在餐桌选择食物和饮料。',
   foodGroup: '食物', beverageGroup: '饮料', food: '主食', bites: '小食', draught: '生啤', bottle: '瓶装啤酒', cocktails: '鸡尾酒', mocktails: '无酒精鸡尾酒', soft: '无酒精饮料', spirits: '威士忌、白兰地与金酒',
-  add: '加入', cart: '您的订单', emptyCart: '购物车还是空的。', payCounter: '提交订单 · 到柜台付款', subtotal: '小计', noCharge: '无需在线付款。',
+  add: '加入', cart: '您的订单', emptyCart: '购物车还是空的。', payCounter: '提交订单', subtotal: '小计', noCharge: '无需在线付款。',
   requestSent: '订单已发送给店员', requestSong: '点一首歌', songCopy: '告诉我们今晚您想听哪首歌。', songTitle: '歌曲名称', artist: '歌手', dedication: '祝福留言（选填）', submitRequest: '提交点歌',
   requestNote: '所有点歌会由驻唱歌手确认。', requestSuccess: '您的点歌已提交给歌手。', callStaff: '呼叫店员', water: '请送饮用水', bill: '买单', help: '需要帮忙吗？',
   memberTitle: '会员登录', memberCopy: '请输入已登记的手机号码和 6 位 PIN。', phone: '手机号码', pin: '6位数 PIN', signIn: '登录', memberWelcome: '欢迎回来。', points: '积分', beerBalance: '预存啤酒', servings: '份',
@@ -104,7 +105,7 @@ const zhCopy = {
   songAsideKicker: 'DYRB 现场音乐', songAsideTitle: '点一首今晚难忘的歌。', songAsideCopy: '选一首大家都能一起唱的歌。驻唱歌手确认后，歌曲才会加入演出队列。', freeRequests: '免费点歌',
   serviceKicker: '为您服务', footerPromise: '您的餐桌 · 您的夜晚',
   cancel: '取消', save: '保存', close: '关闭', loading: '加载中…', en: 'EN', bm: 'BM', zh: '中文',
-  orderReceived: '订单已发送，请到柜台付款。', serviceReceived: '店员已收到通知。', singerAdded: '已加入点歌队列。', demoReset: '演示数据保存在此浏览器中。',
+  orderReceived: '订单已发送，店员已收到通知。', serviceReceived: '店员已收到通知。', singerAdded: '已加入点歌队列。', demoReset: '演示数据保存在此浏览器中。',
 }
 
 function getCopy(language) {
@@ -752,7 +753,7 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
   }
   const can = (permission) => permissions.includes(permission)
   const navNames = { overview: t.overview, songs: t.liveQueue, orders: t.orders, service: t.serviceRequests, members: t.members, menu: t.menuAdmin, staff: t.team, tables: t.tableQr, permissions: t.permissions }
-  const pendingOrders = data?.orders?.filter((o) => o.status !== 'served').length || 0
+  const pendingOrders = data?.orders?.filter((o) => !['served', 'cancelled'].includes(o.status)).length || 0
   const openServices = data?.services?.filter((x) => x.status === 'open').length || 0
   const pendingSongs = data?.songs?.filter((x) => x.status === 'pending').length || 0
   return <div className="dashboard-layout">
@@ -761,7 +762,7 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
       <div className="dashboard-content">{loadError && <div className="form-error" role="alert">{loadError}<button className="secondary-button" onClick={refresh}>Try again</button></div>}{loading && !data ? <div className="loading-screen"><div className="loader-ring" />{t.loading}</div> : data ? <>
         {activeSection === 'overview' && <OverviewPage user={user} data={data} permissions={permissions} setActiveSection={setActiveSection} />}
         {activeSection === 'songs' && <SongsPage data={data} canManage={can('songs.manage')} t={t} run={run} busy={busy} setDialog={setDialog} />}
-        {activeSection === 'orders' && <OrdersPage setDialog={setDialog} data={data} canManage={can('orders.manage')} t={t} run={run} busy={busy} />}
+        {activeSection === 'orders' && <OrdersPage language={language} data={data} canManage={can('orders.manage')} t={t} run={run} busy={busy} />}
         {activeSection === 'service' && <ServicePage data={data} canManage={can('service.manage')} t={t} run={run} busy={busy} />}
         {activeSection === 'members' && <MembersPage data={data} canAdjust={can('members.adjust')} canEnroll={can('members.enroll')} t={t} search={search} setSearch={setSearch} run={run} busy={busy} setDialog={setDialog} />}
         {activeSection === 'menu' && <MenuAdminPage data={data} canManage={can('menu.manage')} t={t} run={run} busy={busy} />}
@@ -776,7 +777,7 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
 
 function OverviewPage({ user, data, permissions, setActiveSection }) {
   const songCount = data?.songs?.filter((x) => x.status === 'pending').length || 0
-  const orderCount = data?.orders?.filter((x) => x.status !== 'served').length || 0
+  const orderCount = data?.orders?.filter((x) => !['served', 'cancelled'].includes(x.status)).length || 0
   const serviceCount = data?.services?.filter((x) => x.status === 'open').length || 0
   const modules = [
     { key: 'songs', label: 'Song requests', value: songCount, unit: 'waiting for a decision', icon: Music2, tone: 'gold', permission: 'songs.view' },
@@ -810,10 +811,26 @@ function SongActions({ song, canManage, t, run, setDialog, busy }) {
   </div>
 }
 
-function OrdersPage({ setDialog, data, canManage, t, run, busy }) {
+function OrdersPage({ data, canManage, t, run, busy, language }) {
   const orders = [...(data?.orders || [])].sort((a, b) => b.createdAt - a.createdAt)
-  return <div className="page-stack"><div className="page-heading-row"><div><span className="section-eyebrow">TABLE SERVICE</span><h1>{t.freshOrders}</h1><p>{t.ordersSub}</p></div><div className="live-session-pill"><span className="live-dot" />Orders open</div></div><div className="order-board-summary"><span className="order-summary-symbol"><ShoppingBag size={19} /></span><div><strong>{orders.filter((x) => x.status !== 'served').length} active orders</strong><span>Guests pay at the counter. Mark an order paid after collection.</span></div><span className="no-pos-pill">Orders aren't sent to Zeoniq.</span></div>
-    <div className="orders-grid">{orders.map((order) => <article className={`order-card ${order.status}`} key={order.id}><div className="order-card-head"><span className="table-number-block"><small>TABLE</small><strong>{order.table}</strong></span><div className="order-card-timing"><span>{timeAgo(order.createdAt)}</span><span className={`status-pill ${order.paymentStatus}`}>{order.paymentStatus === 'paid' ? t.paid : t.unpaid}</span></div></div><div className="order-items">{order.items?.map((item, i) => <div key={`${item.name}-${i}`}><span><strong>{item.qty}×</strong>{item.name}</span><span>{formatMoney(item.price * item.qty)}</span></div>)}</div><div className="order-total"><span>Total</span><strong>{formatMoney(order.items?.reduce((sum, x) => sum + x.price * x.qty, 0) || 0)}</strong></div>{canManage && <div className="order-actions">{order.status === 'new' && <button className="small-action" disabled={busy} onClick={() => run(() => updateOrder(order.id, { status: 'preparing' }))}><Coffee size={14} />{t.markPreparing}</button>}{order.status === 'preparing' && <button className="small-action" disabled={busy} onClick={() => run(() => updateOrder(order.id, { status: 'ready' }))}><Check size={14} />{t.markReady}</button>}{order.status === 'ready' && <button className="small-action" disabled={busy} onClick={() => run(() => updateOrder(order.id, { status: 'served' }))}><Check size={14} />{t.markServed}</button>}{order.paymentStatus !== 'paid' && <button className="paid-action" disabled={busy} onClick={() => setDialog({ kind: 'confirm', title: `Mark table ${order.table} order as paid?`, description: 'Only confirm after receiving payment at the counter.', confirm: t.markPaid, action: () => updateOrder(order.id, { paymentStatus: 'paid' }) })}><Wallet size={14} />{t.markPaid}</button>}</div>}</article>)}</div>{orders.length === 0 && <EmptyState icon={ShoppingBag} title={t.noOrders} />}</div>
+  const dateTime = (value) => new Intl.DateTimeFormat(language === 'zh' ? 'zh-MY' : language === 'bm' ? 'ms-MY' : 'en-GB', { timeZone: 'Asia/Kuala_Lumpur', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
+  const active = orders.filter((order) => !['served', 'cancelled'].includes(order.status))
+  return <div className="page-stack">
+    <div className="page-heading-row"><div><span className="section-eyebrow">TABLE SERVICE</span><h1>{t.freshOrders}</h1><p>{t.ordersSub}</p></div></div>
+    <div className="order-board-summary"><span className="order-summary-symbol"><ShoppingBag size={19} /></span><div><strong>{active.length} {t.activeOrders}</strong><span>{t.posOrderHelp}</span></div></div>
+    <div className="orders-grid">{orders.map((order) => {
+      const completed = order.status === 'served'
+      const cancelled = order.status === 'cancelled'
+      return <article className={`order-card ${order.status}`} key={order.id}>
+        <div className="order-card-head"><span className="table-number-block"><small>{t.table}</small><strong>{order.table}</strong></span><div className="order-card-timing"><time dateTime={new Date(order.createdAt).toISOString()}>{dateTime(order.createdAt)} MYT</time><span className={`status-pill ${completed ? 'paid' : 'pending'}`}>{completed ? t.orderCompleted : cancelled ? t.orderCancelled : t.orderNew}</span></div></div>
+        <div className="order-items">{order.items?.map((item, i) => <div key={`${item.name}-${i}`}><span><strong>{item.qty}×</strong>{item.name}</span><span>{formatMoney(item.price * item.qty)}</span></div>)}</div>
+        <div className="order-total"><span>Total</span><strong>{formatMoney(order.items?.reduce((sum, x) => sum + x.price * x.qty, 0) || 0)}</strong></div>
+        {completed && <p className="order-completion-note">{t.completedBy} {order.completedByName || t.staffMember}{order.completedAt ? ` · ${dateTime(order.completedAt)} MYT` : ''}</p>}
+        {canManage && !completed && !cancelled && <div className="order-actions"><button className="small-action" disabled={busy} aria-busy={busy} onClick={() => run(() => updateOrder(order.id, { status: 'served' }))}><Check size={14} />{busy ? t.loading : t.markCompleted}</button></div>}
+      </article>
+    })}</div>
+    {orders.length === 0 && <EmptyState icon={ShoppingBag} title={t.noOrders} />}
+  </div>
 }
 
 function ServicePage({ data, canManage, t, run, busy }) {

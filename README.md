@@ -49,6 +49,8 @@ Member phone numbers are normalized to Malaysia's `+60` format; staff use unique
 
 ## Roles
 
+Orders use a simple New → Completed handoff for staff to enter into their POS. Apply [supabase/order-completion.sql](supabase/order-completion.sql) and follow [docs/ORDER-COMPLETION.md](docs/ORDER-COMPLETION.md) to enable the Telegram completion button and shared message updates. Payment is handled in the POS.
+
 - **Owner:** Full access; manages the role permission matrix and staff roles.
 - **Boss:** Venue operations and staff account administration; cannot grant roles or permissions.
 - **Manager:** Orders, songs, service requests, menu, and member balances.

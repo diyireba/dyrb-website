@@ -6,6 +6,8 @@ Make the guest menu feel like DYRB's night-time bar: charcoal surfaces, bright o
 
 ## Interface rules
 
+- Orders are a staff handoff into the venue POS: show New or Completed, order date/time in Malaysia, items and total. A single Mark as completed action replaces preparation/payment controls. Completion records the staff member and time; payment is handled in the POS.
+
 - Staff credentials are labelled User ID and Passcode; member credentials remain phone and PIN. Reuse ValidatedForm, existing notifications and role-based account management. Neither login sends SMS.
 
 - Guest pages start with the table number and the next useful action.

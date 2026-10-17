@@ -364,7 +364,7 @@ export async function getOperations(role) {
 }
 
 function songFromDb(x) { return { id: x.id, title: x.title, artist: x.artist || '', table: x.table_code, dedication: x.dedication || '', status: x.status, createdAt: new Date(x.created_at).getTime() } }
-function orderFromDb(x) { return { id: x.id, table: x.table_code, status: x.status, paymentStatus: x.payment_status, items: x.order_items.map((i) => ({ name: i.item_name, qty: i.quantity, price: Number(i.unit_price) })), createdAt: new Date(x.created_at).getTime() } }
+function orderFromDb(x) { return { id: x.id, table: x.table_code, status: x.status, completedAt: x.completed_at, completedByName: x.completed_by_name, items: x.order_items.map((i) => ({ name: i.item_name, qty: i.quantity, price: Number(i.unit_price) })), createdAt: new Date(x.created_at).getTime() } }
 function serviceFromDb(x) { return { id: x.id, table: x.table_code, type: x.request_type, status: x.status, createdAt: new Date(x.created_at).getTime() } }
 
 export async function getPermissions(role) {
@@ -394,11 +394,14 @@ export async function addSingerSong(input) {
 }
 
 export async function updateOrder(id, update) {
-  if (!isLive) return mutateState((s) => { const row = s.orders.find((x) => x.id === id); if (row) Object.assign(row, update) })
-  const payload = {}
-  if (update.status) payload.status = update.status
-  if (update.paymentStatus) payload.payment_status = update.paymentStatus
-  const { error } = await supabase.from('orders').update(payload).eq('id', id)
+  if (update.status !== 'served' || update.paymentStatus !== undefined) throw new Error('Only order completion is supported.')
+  if (!isLive) return mutateState((s) => {
+    const row = s.orders.find((x) => x.id === id)
+    if (!row) throw new Error('Order not found.')
+    if (row.status === 'cancelled') throw new Error('Cancelled orders cannot be completed.')
+    if (row.status !== 'served') Object.assign(row, { status: 'served', completedAt: new Date().toISOString(), completedByName: 'Staff' })
+  })
+  const { error } = await supabase.rpc('complete_order', { p_order_id: id })
   if (error) throw error
 }
 

@@ -20,7 +20,7 @@ function database({ role = 'manager', permissions = ['songs.view', 'orders.view'
       { member_id: 'member-1', item_name: 'Fresh Beer', quantity_remaining: 3, expires_at: '2099-01-01T00:00:00Z' },
     ],
     song_requests: [{ id: 'song-1', title: 'My Song', artist: 'Artist', dedication: '<b>hello</b> https://example.com', table_code: '08', status: 'pending' }],
-    orders: [{ id: 'order-1', table_code: '08', status: 'new', order_items: [{ item_name: 'Chicken', quantity: 2, unit_price: '19.00' }] }],
+    orders: [{ id: 'order-1', table_code: '08', status: 'new', created_at: '2026-10-17T06:12:00Z', order_items: [{ item_name: 'Chicken', quantity: 2, unit_price: '19.00' }] }],
     audit_log: [], telegram_updates: [], telegram_outbox: [], telegram_topics: [],
   }
   const calls = []
@@ -66,14 +66,25 @@ function database({ role = 'manager', permissions = ['songs.view', 'orders.view'
         rows.forEach(r => Object.assign(r, { status: 'processing', attempts: r.attempts + 1, lease_id: 'delivery-lease' }))
         return { data: structuredClone(rows) }
       }
+      if (name === 'complete_telegram_order') {
+        if (db.failCompletion) return { error: { message: 'database failure' } }
+        const order = tables.orders[0]
+        const already = order.status === 'served'
+        if (!already) Object.assign(order, { status: 'served', completed_at: '2026-10-17T06:15:00Z', completed_by_name: 'Aden' })
+        db.completionArgs = args
+        return { data: { already_completed: already } }
+      }
       throw new Error('Unexpected RPC')
     },
   }
   return db
 }
 function telegram(status = 200, retryAfter = 60) {
-  const messages = []
-  return { messages, fetcher: async (_url, options) => { messages.push(JSON.parse(options.body)); return { ok: status === 200, status, json: async () => status === 200 ? { ok: true, result: { message_id: 1 } } : { ok: false, error_code: status, parameters: { retry_after: retryAfter } } } } }
+  const messages = [], methods = []
+  return { messages, methods, fetcher: async (url, options) => {
+    methods.push(url.split('/').at(-1)); messages.push(JSON.parse(options.body))
+    return { ok: status === 200, status, json: async () => status === 200 ? { ok: true, result: { message_id: 1 } } : { ok: false, error_code: status, parameters: { retry_after: retryAfter } } }
+  } }
 }
 function update(text = '/balance 0123456789', extra = {}) {
   return { update_id: 1, message: { from: { id: 42 }, chat: { id: 42, type: 'private' }, text, ...extra } }
@@ -297,4 +308,94 @@ test('group topic delivery retries Telegram rate limits through the existing out
   assert.equal(db.tables.telegram_outbox[0].status, 'pending')
   assert.equal(db.tables.telegram_outbox[0].last_error_code, 'telegram_429')
   assert.equal(tg.messages[0].message_thread_id, 123)
+})
+
+const deliveryId = '12345678-1234-1234-1234-123456789abc'
+function orderCallback(extra = {}) {
+  return { update_id: 50, callback_query: { id: 'callback-1', from: { id: 42 }, data: `done:${deliveryId}`, message: { message_id: 77, chat: { id: -1001234567890, type: 'supergroup' }, message_thread_id: 123 }, ...extra } }
+}
+function sentOrder(db) {
+  topic(db)
+  db.tables.telegram_outbox.push({ id: deliveryId, kind: 'order', entity_id: 'order-1', topic_id: 'topic-1', telegram_message_id: 77, status: 'sent' })
+}
+
+test('order alerts have Malaysia date/time, item lines, total last and one completion button', async () => {
+  const db = database(), tg = telegram(); enqueue(db)
+  await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
+  const alert = tg.messages[0]
+  assert.match(alert.text, /^New Order Table 08\nOrder Date and Time: 17 Oct 2026, 02:12 pm \(MYT\)/)
+  assert.match(alert.text, /\n\n2 × Chicken · RM 38.00\n\nTotal RM 38.00$/)
+  assert.doesNotMatch(alert.text, /Pay at counter|order-1|payment/i)
+  assert.deepEqual(alert.reply_markup.inline_keyboard, [[{ text: '✓ Mark as completed', callback_data: 'done:delivery-1' }]])
+  assert.equal(db.tables.telegram_outbox[0].telegram_message_id, 1)
+})
+
+test('an authorized completion edits the shared message, removes its button and preserves first completion', async () => {
+  const db = database({ permissions: ['orders.view', 'orders.manage'] }), tg = telegram(); sentOrder(db)
+  assert.equal((await request(webhook(db, tg), orderCallback())).status, 200)
+  assert.equal(db.tables.orders[0].status, 'served')
+  assert.equal(db.completionArgs.p_telegram_user_id, '42')
+  assert.equal(db.completionArgs.p_thread_id, 123)
+  assert.equal(db.completionArgs.p_message_id, 77)
+  assert.deepEqual(tg.methods, ['editMessageText', 'answerCallbackQuery'])
+  assert.equal(tg.messages[0].message_id, 77)
+  assert.match(tg.messages[0].text, /^✓ Completed Table 08/)
+  assert.match(tg.messages[0].text, /Completed by Aden/)
+  assert.deepEqual(tg.messages[0].reply_markup.inline_keyboard, [])
+  const first = db.tables.orders[0].completed_at
+  await request(webhook(db, tg), orderCallback())
+  assert.equal(db.tables.orders[0].completed_at, first)
+  assert.equal(tg.messages.at(-1).text, 'Already completed.')
+})
+
+test('unlinked/inactive/unauthorized users and moved or forged buttons never complete orders', async () => {
+  for (const scenario of ['unlinked', 'inactive', 'unauthorized', 'wrong-chat', 'wrong-thread', 'wrong-message', 'disabled-topic', 'invalid-data', 'wrong-secret']) {
+    const db = database(scenario === 'unlinked' ? { linked: false } : scenario === 'inactive' ? { active: false } : { permissions: scenario === 'unauthorized' ? ['orders.view'] : ['orders.view', 'orders.manage'] }), tg = telegram(); sentOrder(db)
+    const callback = orderCallback()
+    if (scenario === 'wrong-chat') callback.callback_query.message.chat.id = -100999
+    if (scenario === 'wrong-thread') callback.callback_query.message.message_thread_id = 999
+    if (scenario === 'wrong-message') callback.callback_query.message.message_id = 999
+    if (scenario === 'disabled-topic') db.tables.telegram_topics[0].active = false
+    if (scenario === 'invalid-data') callback.callback_query.data = 'done:not-a-uuid'
+    await request(webhook(db, tg), callback, scenario === 'wrong-secret' ? {} : undefined)
+    assert.equal(db.calls.includes('complete_telegram_order'), false, scenario)
+    assert.equal(db.tables.orders[0].status, 'new', scenario)
+    assert.equal(tg.methods.includes('editMessageText'), false, scenario)
+  }
+})
+
+test('completion database failure leaves the order and shared message unchanged', async () => {
+  const db = database({ permissions: ['orders.manage'] }), tg = telegram(); sentOrder(db); db.failCompletion = true
+  assert.equal((await request(webhook(db, tg), orderCallback())).status, 503)
+  assert.equal(db.tables.orders[0].status, 'new')
+  assert.equal(tg.methods.includes('editMessageText'), false)
+})
+
+test('queued completion from website edits the original alert instead of sending another notification', async () => {
+  const db = database(), tg = telegram(); sentOrder(db)
+  Object.assign(db.tables.orders[0], { status: 'served', completed_at: '2026-10-17T06:15:00Z', completed_by_name: 'Aden' })
+  db.tables.telegram_outbox.push({ id: 'edit-1', kind: 'order_completed', entity_id: 'order-1', topic_id: 'topic-1', attempts: 0, status: 'pending' })
+  await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
+  assert.deepEqual(tg.methods, ['editMessageText'])
+  assert.equal(tg.messages[0].message_id, 77)
+  assert.match(tg.messages[0].text, /Completed by Aden/)
+  assert.equal(db.tables.telegram_outbox[1].status, 'sent')
+})
+
+test('orders completed before notification delivery never show a completion button', async () => {
+  const db = database(), tg = telegram(); enqueue(db); db.tables.orders[0].status = 'served'
+  await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
+  assert.match(tg.messages[0].text, /^✓ Completed/)
+  assert.deepEqual(tg.messages[0].reply_markup.inline_keyboard, [])
+})
+
+test('a retry of an already applied shared-message edit succeeds without duplicate sends', async () => {
+  const db = database(); sentOrder(db); db.tables.orders[0].status = 'served'
+  db.tables.telegram_outbox.push({ id: 'edit-1', kind: 'order_completed', entity_id: 'order-1', topic_id: 'topic-1', attempts: 1, status: 'pending' })
+  const tg = { fetcher: async (url) => {
+    assert.ok(url.endsWith('/editMessageText'))
+    return { ok: false, status: 400, json: async () => ({ ok: false, error_code: 400, description: 'Bad Request: message is not modified: specified content and reply markup are exactly the same' }) }
+  } }
+  await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
+  assert.equal(db.tables.telegram_outbox[1].status, 'sent')
 })
