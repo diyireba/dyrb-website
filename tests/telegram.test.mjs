@@ -164,7 +164,8 @@ test('song and order summaries follow role permissions', async () => {
   assert.match(await bot.commandReply(db, '42', '/songs'), /My Song/)
   assert.match(await bot.commandReply(db, '42', '/orders'), /cannot view orders/)
   const manager = database()
-  assert.match(await bot.commandReply(manager, '42', '/orders'), /RM 38.00/)
+  assert.match(await bot.commandReply(manager, '42', '/orders'), /2 x Chicken/)
+  assert.doesNotMatch(await bot.commandReply(manager, '42', '/orders'), /RM|Total/)
 })
 test('submission notifications fetch committed records and do not trust webhook payloads', async () => {
   const db = database(), tg = telegram(); enqueue(db)
@@ -172,8 +173,8 @@ test('submission notifications fetch committed records and do not trust webhook 
   assert.equal(result.status, 200)
   assert.equal(result.body.sent, 1)
   assert.match(tg.messages[0].text, /Table 08/)
-  assert.match(tg.messages[0].text, /Total RM 38.00/)
-  assert.match(tg.messages[0].text, /2 × Chicken/)
+  assert.doesNotMatch(tg.messages[0].text, /RM|Total/)
+  assert.match(tg.messages[0].text, /2 x Chicken/)
   assert.doesNotMatch(tg.messages[0].text, /FAKE/)
   assert.equal(db.tables.telegram_outbox[0].status, 'sent')
   await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
@@ -246,7 +247,7 @@ test('order/song topic notifications preserve their thread and fetch genuine com
     assert.equal((await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })).body.sent, 1)
     assert.equal(tg.messages[0].chat_id, '-1001234567890')
     assert.equal(tg.messages[0].message_thread_id, 123)
-    assert.match(tg.messages[0].text, kind === 'order' ? /2 × Chicken/ : /My Song/)
+    assert.match(tg.messages[0].text, kind === 'order' ? /2 x Chicken/ : /My Song/)
     assert.equal(db.tables.telegram_outbox[0].status, 'sent')
   }
 })
@@ -319,12 +320,13 @@ function sentOrder(db) {
   db.tables.telegram_outbox.push({ id: deliveryId, kind: 'order', entity_id: 'order-1', topic_id: 'topic-1', telegram_message_id: 77, status: 'sent' })
 }
 
-test('order alerts have Malaysia date/time, item lines, total last and one completion button', async () => {
+test('order alerts have numeric Malaysia date/time, quantities and one button without prices', async () => {
   const db = database(), tg = telegram(); enqueue(db)
   await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
   const alert = tg.messages[0]
-  assert.match(alert.text, /^New Order Table 08\nOrder Date and Time: 17 Oct 2026, 02:12 pm \(MYT\)/)
-  assert.match(alert.text, /\n\n2 × Chicken · RM 38.00\n\nTotal RM 38.00$/)
+  assert.match(alert.text, /^New order · Table 08\n17\/10\/2026, 2:12pm/)
+  assert.match(alert.text, /\n\n2 x Chicken$/)
+  assert.doesNotMatch(alert.text, /RM|Total|38\.00/)
   assert.doesNotMatch(alert.text, /Pay at counter|order-1|payment/i)
   assert.deepEqual(alert.reply_markup.inline_keyboard, [[{ text: '✓ Mark as completed', callback_data: 'done:delivery-1' }]])
   assert.equal(db.tables.telegram_outbox[0].telegram_message_id, 1)
@@ -339,7 +341,7 @@ test('an authorized completion edits the shared message, removes its button and 
   assert.equal(db.completionArgs.p_message_id, 77)
   assert.deepEqual(tg.methods, ['editMessageText', 'answerCallbackQuery'])
   assert.equal(tg.messages[0].message_id, 77)
-  assert.match(tg.messages[0].text, /^✓ Completed Table 08/)
+  assert.match(tg.messages[0].text, /^✓ Completed · Table 08/)
   assert.match(tg.messages[0].text, /Completed by Aden/)
   assert.deepEqual(tg.messages[0].reply_markup.inline_keyboard, [])
   const first = db.tables.orders[0].completed_at

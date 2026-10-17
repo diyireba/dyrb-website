@@ -2,15 +2,13 @@
 
 Customers send an order; staff enter it into their venue POS and mark it completed. There are no preparation, readiness or payment actions in the customer-order dashboard. Payment stays in the POS. Existing internal `served` status is displayed as Completed for compatibility; `preparing` and `ready` records appear as New until completed. Cancelled orders remain cancelled and cannot be completed.
 
-New Telegram alerts show:
+Telegram order alerts and completion edits show quantities and item names without prices or totals. Date/time uses Asia/Kuala_Lumpur in DD/MM/YYYY, h:mmam/pm format. New alerts show:
 
 ```text
-New Order Table 08
-Order Date and Time: 17 Oct 2026, 02:12 pm (MYT)
+New order · Table A3
+17/10/2026, 3:49pm
 
-1 × Sausage · RM 18.00
-
-Total RM 18.00
+1 x Sausage
 ```
 
 The **✓ Mark as completed** button edits the original shared message to Completed, records who completed it and when, and removes the button. It requires an active linked staff account with `orders.manage`, and validates the exact registered chat/topic/message both in the handler and database. Each staff member must be individually linked in `telegram_staff`; group membership alone does not grant permission to complete orders. Other group members can see the shared completed status.

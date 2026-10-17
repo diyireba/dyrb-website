@@ -51,7 +51,10 @@ async function editOrderMessage(token: string, chatId: string, messageId: number
 }
 export function malaysiaOrderTime(value: any) {
   const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? 'Date unavailable' : new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).format(date)
+  if (Number.isNaN(date.getTime())) return 'Date unavailable'
+  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', day: '2-digit', month: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(date)
+  const part = (type: string) => parts.find(p => p.type === type)?.value || ''
+  return `${part('day')}/${part('month')}/${part('year')}, ${Number(part('hour'))}:${part('minute')}${part('dayPeriod').toLowerCase()}`
 }
 function checked(result: any) { if (result.error) throw new Error('database_unavailable'); return result.data }
 export async function staffAccess(db: any, telegramUserId: string) {
@@ -64,8 +67,7 @@ export async function staffAccess(db: any, telegramUserId: string) {
 }
 export function orderText(order: any) {
   const items = order.order_items || []
-  const total = items.reduce((sum: number, item: any) => sum + Number(item.unit_price) * item.quantity, 0)
-  return [`${orderCompleted(order) ? '✓ Completed' : 'New Order'} Table ${order.table_code}`, `Order Date and Time: ${malaysiaOrderTime(order.created_at)} (MYT)`, '', ...items.map((i: any) => `${i.quantity} × ${i.item_name} · RM ${(Number(i.unit_price) * i.quantity).toFixed(2)}`), '', `Total RM ${total.toFixed(2)}`, ...(orderCompleted(order) ? ['', `Completed by ${order.completed_by_name || 'Staff'}${order.completed_at ? ` · ${malaysiaOrderTime(order.completed_at)} (MYT)` : ''}`, 'Entered into POS.'] : [])].join('\n')
+  return [`${orderCompleted(order) ? '✓ Completed' : 'New order'} · Table ${order.table_code}`, malaysiaOrderTime(order.created_at), '', ...items.map((i: any) => `${i.quantity} x ${i.item_name}`), ...(orderCompleted(order) ? ['', `Completed by ${order.completed_by_name || 'Staff'}${order.completed_at ? ` · ${malaysiaOrderTime(order.completed_at)}` : ''}`, 'Entered into POS.'] : [])].join('\n')
 }
 export function songText(song: any) {
   return [`New song · Table ${song.table_code}`, song.title, song.artist ? `Artist: ${song.artist}` : '', song.dedication ? `Dedication: ${song.dedication}` : '', `Request ${song.id}`].filter(Boolean).join('\n')
@@ -96,8 +98,8 @@ export async function commandReply(db: any, userId: string, text: string) {
   }
   if (command === '/orders') {
     if (!staff.can('orders.view')) return 'Your staff role cannot view orders.'
-    const orders = checked(await db.from('orders').select('id,table_code,status,order_items(quantity,unit_price)').in('status', ['new', 'preparing', 'ready']).order('created_at', { ascending: false }).limit(10)) || []
-    return orders.length ? orders.map((o: any) => `Table ${o.table_code} · New · RM ${(o.order_items || []).reduce((sum: number, i: any) => sum + i.quantity * Number(i.unit_price), 0).toFixed(2)} · ${o.id.slice(0, 8)}`).join('\n') : 'No active orders.'
+    const orders = checked(await db.from('orders').select('id,table_code,status,order_items(quantity,item_name)').in('status', ['new', 'preparing', 'ready']).order('created_at', { ascending: false }).limit(10)) || []
+    return orders.length ? orders.map((o: any) => `Table ${o.table_code} · New\n${(o.order_items || []).map((i: any) => `${i.quantity} x ${i.item_name}`).join('\n')}`).join('\n\n') : 'No active orders.'
   }
   return 'Unknown command. Use /help.'
 }
