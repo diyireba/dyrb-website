@@ -4,6 +4,8 @@ This integration is prepared locally. It becomes live only after the bot, databa
 
 ## What it does
 
+Song alerts use `New song · Table A3`, a blank line, `Love Story - Taylor`, and an optional blank line plus `Remark: Happy Birthday`. Artist and remark are omitted when not supplied; internal request IDs are not displayed.
+
 For the DYRB staff group with **Customer Order**, **Song**, and **Customer Balance Check** topics, follow `docs/TELEGRAM-TOPICS.md` and apply `supabase/telegram-topics.sql` after the base migration below. Order/song alerts can be routed to the approved group topics. Balance replies remain private to the authorized requester.
 
 - Sends new-song and new-order alerts to each linked staff member's **private** chat, only when their current role can view that data.

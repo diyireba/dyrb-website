@@ -70,7 +70,7 @@ export function orderText(order: any) {
   return [`${orderCompleted(order) ? '✓ Completed' : 'New order'} · Table ${order.table_code}`, malaysiaOrderTime(order.created_at), '', ...items.map((i: any) => `${i.quantity} x ${i.item_name}`), ...(orderCompleted(order) ? ['', `Completed by ${order.completed_by_name || 'Staff'}${order.completed_at ? ` · ${malaysiaOrderTime(order.completed_at)}` : ''}`, 'Entered into POS.'] : [])].join('\n')
 }
 export function songText(song: any) {
-  return [`New song · Table ${song.table_code}`, song.title, song.artist ? `Artist: ${song.artist}` : '', song.dedication ? `Dedication: ${song.dedication}` : '', `Request ${song.id}`].filter(Boolean).join('\n')
+  return [`New song · Table ${song.table_code}`, '', `${song.title}${song.artist ? ` - ${song.artist}` : ''}`, ...(song.dedication ? ['', `Remark: ${song.dedication}`] : [])].join('\n')
 }
 export async function commandReply(db: any, userId: string, text: string) {
   const [rawCommand, ...args] = text.trim().split(/\s+/)

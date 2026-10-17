@@ -215,6 +215,11 @@ test('untrusted song text is sent as plain text with previews disabled', async (
   assert.equal(tg.messages[0].parse_mode, undefined)
   assert.deepEqual(tg.messages[0].link_preview_options, { is_disabled: true })
 })
+
+test('song alerts use the requested title/artist and remark layout without internal IDs', () => {
+  assert.equal(bot.songText({ id: 'internal-id', table_code: 'A3', title: 'Love Story', artist: 'Taylor', dedication: 'Happy Birthday' }), 'New song · Table A3\n\nLove Story - Taylor\n\nRemark: Happy Birthday')
+  assert.equal(bot.songText({ table_code: 'A3', title: 'Love Story', artist: '', dedication: '' }), 'New song · Table A3\n\nLove Story')
+})
 test('network error messages never expose the Telegram token URL', async () => {
   await assert.rejects(bot.sendTelegram('super-secret', '42', 'hello', async () => { throw new Error('https://api.telegram.org/botsuper-secret/sendMessage') }), error => error.message === 'telegram_network')
 })
