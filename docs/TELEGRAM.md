@@ -16,7 +16,7 @@ Open the verified **@BotFather** in Telegram, send `/newbot`, and choose a name 
 
 ## 2. Deploy the backend
 
-Apply `supabase/telegram.sql` after the existing schema/stored-items migrations. Deploy this repository to your HTTPS website host with its Vercel API routes. Continue using your existing server-only Supabase credentials.
+Apply `supabase/telegram.sql` after the existing schema/stored-items migrations. Deploy this repository to your HTTPS website host with its backend API routes (Vercel, or the Netlify wrappers described in `docs/NETLIFY.md`). Continue using your existing server-only Supabase credentials.
 
 Add these **server-only** environment variables and redeploy:
 

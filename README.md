@@ -78,3 +78,7 @@ All 40 distinct beverages have individual optimized WebP images (about 3.5 MB co
 ## Staff Telegram bot
 
 The optional Telegram integration sends new-song/new-order alerts to linked staff in private chats and supports `/songs`, `/orders`, and permission-checked `/balance <phone>`. It is not active in Vite demo mode. Follow [docs/TELEGRAM.md](docs/TELEGRAM.md) to create the bot, deploy the endpoints, apply `supabase/telegram.sql`, link staff, and configure the database webhook plus retry Cron. Secrets stay server-side. No live Telegram bot or deployment was configured during development.
+
+## Deploy on Netlify
+
+Netlify is also supported, including the member/admin APIs and Telegram endpoints. Follow [docs/NETLIFY.md](docs/NETLIFY.md). The deployment uses `netlify.toml` and the wrappers in `netlify/functions`; Supabase and all existing `/api` paths stay the same. Verify the wrappers locally with `node tools/verify-netlify.mjs`.
