@@ -11,11 +11,12 @@ import {
   adminAction, adjustMember, demoPermissionMap, formatMoney, getMemberStoredItems, getMenu, getOperations, getPermissions,
   isLive, listenForDemoChanges, login, logout, permissionLabels, roles, roleLabels, saveMenuAvailability,
   savePermission, storedDrinkCatalog, submitOrder, submitService, submitSong, supabase, timeAgo, updateOrder, updateService,
-  updateSong, addSingerSong, saveMenuEvent, eventIsActive,
+  updateSong, addSingerSong, saveMenuEvent, eventIsActive, createTable, updateTable,
 } from './data.js'
 
 const copy = {
   en: {
+    addTable: 'Add table', editTable: 'Edit table', tableLabel: 'Table label', tableCodeLabel: 'Table code', tableSort: 'Display order', tableActive: 'Active', tableInactive: 'Inactive', activateTable: 'Activate table', deactivateTable: 'Deactivate table', tableListHelp: 'Select a table to manage its QR code.', tableCodeHelp: 'Use 01 or A1. Codes must match printed QR links exactly.', tableCodeFixed: 'The code stays fixed so printed QR codes keep working.', tableInactiveHelp: 'Customers can browse, but orders and requests are disabled for this table.', tableActiveHelp: 'Customers can send orders, song requests and service requests.', downloadQr: 'Download QR', noTables: 'No tables yet. Add your first table to create a QR code.', deactivateTableHelp: 'New orders and requests will be blocked for this table. Existing records stay available.', activateTableHelp: 'Customers using this table QR will be able to send orders and requests.', scanToOrder: 'Scan to order',
     menu: 'Menu', songs: 'Songs', member: 'Member', liveMusic: 'Live music every night',
     guestTitle: 'Order from your table', guestCopy: 'Browse the menu, request a song, or call our team.',
     table: 'TABLE', menuTitle: 'Browse the menu', menuCopy: 'Food and drinks, ordered from your table.',
@@ -51,6 +52,7 @@ const copy = {
     orderReceived: 'Order sent. Our team has been notified.', serviceReceived: 'The team has been notified.', singerAdded: 'Added to the queue.', demoReset: 'Demo data is saved in this browser.',
   },
   bm: {
+    addTable: 'Tambah meja', editTable: 'Edit meja', tableLabel: 'Nama meja', tableCodeLabel: 'Kod meja', tableSort: 'Turutan paparan', tableActive: 'Aktif', tableInactive: 'Tidak aktif', activateTable: 'Aktifkan meja', deactivateTable: 'Nyahaktifkan meja', tableListHelp: 'Pilih meja untuk mengurus kod QR.', tableCodeHelp: 'Gunakan 01 atau A1. Kod mesti sepadan dengan pautan QR yang dicetak.', tableCodeFixed: 'Kod dikekalkan supaya QR yang dicetak terus berfungsi.', tableInactiveHelp: 'Pelanggan boleh melihat menu tetapi tidak boleh menghantar pesanan atau permintaan.', tableActiveHelp: 'Pelanggan boleh menghantar pesanan, lagu dan permintaan perkhidmatan.', downloadQr: 'Muat turun QR', noTables: 'Belum ada meja. Tambah meja pertama untuk mencipta kod QR.', deactivateTableHelp: 'Pesanan dan permintaan baharu akan disekat. Rekod sedia ada dikekalkan.', activateTableHelp: 'Pelanggan boleh menghantar pesanan dan permintaan melalui QR meja ini.', scanToOrder: 'Imbas untuk memesan',
     menu: 'Menu', songs: 'Lagu', member: 'Ahli', liveMusic: 'Muzik langsung setiap malam',
     guestTitle: 'Pesan terus dari meja anda', guestCopy: 'Lihat menu, minta lagu atau panggil staf.',
     table: 'MEJA', menuTitle: 'Lihat menu', menuCopy: 'Pilih makanan dan minuman dari meja anda.',
@@ -88,6 +90,7 @@ const copy = {
 }
 
 const zhCopy = {
+  addTable: '添加桌号', editTable: '编辑桌号', tableLabel: '桌名', tableCodeLabel: '桌号代码', tableSort: '显示顺序', tableActive: '已启用', tableInactive: '已停用', activateTable: '启用桌号', deactivateTable: '停用桌号', tableListHelp: '选择桌号以管理二维码。', tableCodeHelp: '例如 01 或 A1。代码必须与已打印的二维码链接完全一致。', tableCodeFixed: '桌号代码保持不变，确保已打印的二维码继续有效。', tableInactiveHelp: '顾客可浏览菜单，但不能提交订单、点歌或服务请求。', tableActiveHelp: '顾客可提交订单、点歌及服务请求。', downloadQr: '下载二维码', noTables: '暂无桌号。添加第一个桌号以生成二维码。', deactivateTableHelp: '将暂停此桌号的新订单及请求，现有记录会保留。', activateTableHelp: '顾客可通过此桌二维码提交订单及请求。', scanToOrder: '扫码点餐',
   ordersSub: '将订单输入 POS 后标记完成。', orderNew: '新订单', orderCompleted: '已完成', orderCancelled: '已取消', markCompleted: '标记完成', posOrderHelp: '将订单输入 POS 后，请标记完成。', activeOrders: '笔待处理订单', completedBy: '完成人', staffMember: '店员',
   menu: '菜单', songs: '点歌', member: '会员', liveMusic: '每晚都有现场音乐',
   guestTitle: '在餐桌直接点餐', guestCopy: '浏览菜单、点歌，或联系店员。',
@@ -767,7 +770,7 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
         {activeSection === 'members' && <MembersPage data={data} canAdjust={can('members.adjust')} canEnroll={can('members.enroll')} t={t} search={search} setSearch={setSearch} run={run} busy={busy} setDialog={setDialog} />}
         {activeSection === 'menu' && <MenuAdminPage data={data} canManage={can('menu.manage')} t={t} run={run} busy={busy} />}
         {activeSection === 'staff' && <StaffPage data={data} role={user.role} userId={user.id} t={t} run={run} busy={busy} setDialog={setDialog} />}
-        {activeSection === 'tables' && <TablesPage data={data} t={t} />}
+        {activeSection === 'tables' && <TablesPage data={data} t={t} busy={busy} run={run} setDialog={setDialog} notify={notify} />}
         {activeSection === 'permissions' && user.role === 'owner' && <PermissionsPage data={data} t={t} busy={busy} run={run} />}
       </> : null}</div>
     </main>
@@ -918,14 +921,45 @@ function PermissionsPage({ data, t, busy, run }) {
   return <div className="page-stack"><div className="page-heading-row"><div><span className="section-eyebrow">OWNER CONTROLS</span><h1>{t.permissionsTitle}</h1><p>{t.permissionsSub}</p></div><span className="owner-only-pill"><Crown size={14} />Owner only</span></div><div className="permission-callout"><Shield size={18} /><div><strong>Owner always keeps full access.</strong><span>Changes apply to backend data access and dashboard sections. Only the owner can edit this matrix.</span></div></div><section className="permission-matrix surface-card"><div className="permission-matrix-head"><span>CAPABILITY</span>{editableRoles.map((role) => <span key={role}>{roleLabels[role]}</span>)}</div>{groups.map((group) => <div className="permission-group" key={group.name}><div className="permission-group-title">{group.name}</div>{group.permissions.map((key) => <div className="permission-row" key={key}><div><strong>{permissionLabels[key]}</strong></div>{editableRoles.map((role) => <label className="permission-cell" key={role}><span className="sr-only">{roleLabels[role]}: {permissionLabels[key]}</span><input type="checkbox" checked={enabled(role, key)} disabled={busy || key === 'permissions.manage'} onChange={(e) => run(() => savePermission(role, key, e.target.checked))} /></label>)}</div>)}</div>)}<div className="permission-matrix-foot"><Shield size={14} />Boss account administration does not include role or permission grants.</div></section></div>
 }
 
-function TablesPage({ data, t }) {
-  const tables = data?.tables?.length ? data.tables : (data?.tables || []).map((code) => ({ code }))
-  const fallback = ['02', '03', '05', '07', '08', '09', '10', '11', '12']
-  const rows = tables.length ? tables : isLive ? [] : fallback.map((code) => ({ code }))
-  const tableValue = (row) => typeof row === 'string' ? row : row.code || row.table_code
-  const [selected, setSelected] = useState(tableValue(rows[0]) || '08')
-  const qrUrl = `${window.location.origin}/menu?table=${encodeURIComponent(selected)}`
-  return <div className="page-stack"><div className="page-heading-row"><div><span className="section-eyebrow">TABLE IDENTITY</span><h1>{t.tablesTitle}</h1><p>{t.tablesSub}</p></div><span className="readiness-pill"><QrCode size={15} />{rows.length} table codes</span></div><div className="qr-manager-layout"><section className="surface-card qr-table-list"><div className="menu-admin-head"><div><h2>Tables</h2><p>Choose a table to preview its QR.</p></div></div><div className="table-code-grid">{rows.map((row) => { const code = tableValue(row); return <button className={selected === code ? 'active' : ''} key={code} onClick={() => setSelected(code)}><span className="table-mini-icon"><QrCode size={17} /></span><span><small>TABLE</small><strong>{code}</strong></span><ChevronRight size={15} /></button> })}</div></section><section className="qr-preview-card"><div className="qr-preview-top"><span className="section-eyebrow">TABLE {selected}</span><span className="qr-status"><i />Active</span></div><div className="qr-code-frame"><QRCodeSVG value={qrUrl} size={196} bgColor="#faf7f0" fgColor="#171511" level="H" includeMargin /></div><h2>Scan to order</h2><p>Menu, song requests and service — all at this table.</p><a href={qrUrl} className="secondary-button" target="_blank" rel="noreferrer">{t.openQr}<ArrowUpRight size={15} /></a><div className="qr-url-label">{qrUrl}</div></section></div></div>
+function TablesPage({ data, t, busy, run, setDialog, notify }) {
+  const rows = useMemo(() => (data?.tables || []).map((row, index) => typeof row === 'string' ? { id: row, code: row, label: `Table ${row}`, active: true, sort_order: index } : row).sort((a, b) => a.sort_order - b.sort_order || a.code.localeCompare(b.code)), [data?.tables])
+  const [selected, setSelected] = useState('')
+  const selectedRow = rows.find(row => row.code === selected) || rows[0] || null
+  const qrRef = useRef(null)
+  const qrUrl = selectedRow ? `${window.location.origin}/menu?table=${encodeURIComponent(selectedRow.code)}` : ''
+  function addTable() {
+    setDialog({ kind: 'create-table', title: t.addTable, action: async (body) => { const row = await createTable(body); setSelected(row.code) } })
+  }
+  function editTable() {
+    setDialog({ kind: 'edit-table', title: t.editTable, table: selectedRow, action: (body) => updateTable(selectedRow.id, { label: body.label, sort_order: body.sort_order }) })
+  }
+  function toggleTable() {
+    setDialog({ kind: 'confirm', title: `${selectedRow.active ? t.deactivateTable : t.activateTable} · ${selectedRow.code}`, description: selectedRow.active ? t.deactivateTableHelp : t.activateTableHelp, confirm: selectedRow.active ? t.deactivateTable : t.activateTable, action: () => updateTable(selectedRow.id, { active: !selectedRow.active }) })
+  }
+  function downloadQr() {
+    try {
+      const svg = qrRef.current?.querySelector('svg')
+      if (!svg || !selectedRow) throw new Error('QR unavailable')
+      const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml;charset=utf-8' }))
+      const link = document.createElement('a'); link.href = url; link.download = `DYRB-table-${selectedRow.code}.svg`; document.body.appendChild(link); link.click(); link.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch { notify('Could not download the QR code. Please try again.', 'error') }
+  }
+  return <div className="page-stack">
+    <div className="page-heading-row"><div><span className="section-eyebrow">TABLE IDENTITY</span><h1>{t.tablesTitle}</h1><p>{t.tablesSub}</p></div><button className="primary-button" disabled={busy} onClick={addTable}><Plus size={16} />{t.addTable}</button></div>
+    {!rows.length ? <section className="surface-card"><EmptyState icon={QrCode} title={t.noTables} /></section> : <div className="qr-manager-layout">
+      <section className="surface-card qr-table-list"><div className="menu-admin-head"><div><h2>{t.tablesTitle}</h2><p>{t.tableListHelp}</p></div></div>
+        <div className="table-code-grid">{rows.map(row => <button className={selectedRow.code === row.code ? 'active' : ''} key={row.id} aria-pressed={selectedRow.code === row.code} onClick={() => setSelected(row.code)}><span className="table-mini-icon"><QrCode size={17} /></span><span><small>{row.active ? t.tableActive : t.tableInactive}</small><strong>{row.code}</strong></span><ChevronRight size={15} /></button>)}</div>
+      </section>
+      <section className="qr-preview-card"><div className="qr-preview-top"><span className="section-eyebrow">{t.table} {selectedRow.code}</span><span className={`qr-status ${selectedRow.active ? '' : 'qr-inactive'}`}><i />{selectedRow.active ? t.tableActive : t.tableInactive}</span></div>
+        <div className="qr-code-frame" ref={qrRef}><QRCodeSVG value={qrUrl} size={196} bgColor="#ffffff" fgColor="#171511" level="H" includeMargin /></div>
+        <h2>{selectedRow.label || `${t.table} ${selectedRow.code}`}</h2><p>{selectedRow.active ? t.tableActiveHelp : t.tableInactiveHelp}</p>
+        <div className="table-manage-actions"><button className="secondary-button" disabled={busy} onClick={editTable}><Settings2 size={15} />{t.editTable}</button><button className="secondary-button" disabled={busy} onClick={toggleTable}>{selectedRow.active ? t.deactivateTable : t.activateTable}</button></div>
+        <div className="table-manage-actions"><a href={qrUrl} className="secondary-button" target="_blank" rel="noreferrer">{t.openQr}<ArrowUpRight size={15} /></a><button className="secondary-button" onClick={downloadQr}><QrCode size={15} />{t.downloadQr}</button></div>
+        <div className="qr-url-label">{qrUrl}</div>
+      </section>
+    </div>}
+  </div>
 }
 
 function ActionDialog({ config, t, onClose, onSubmit, busy }) {
@@ -946,6 +980,11 @@ function ActionDialog({ config, t, onClose, onSubmit, busy }) {
     {config.kind === 'enroll-member' && <><p>Confirm the member in person before creating an account. They choose their PIN with staff present.</p><label>{t.fullName}<input name="name" required maxLength={100} placeholder="Member name" /></label><label>{t.phone}<input name="phone" required type="tel" placeholder="01X XXX XXXX" /></label><label>{t.newPin}<input name="pin" type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="6 digits" /></label></>}
     {config.kind === 'reset-pin' && <><p>Confirm the member in person before setting a new PIN. The change applies immediately.</p><label>{t.newPin}<input name="pin" type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="6 digits" autoFocus /></label></>}
     {config.kind === 'add-staff' && <><p>Create a personal account. Staff sign in using their assigned user ID and passcode.</p><label>{t.fullName}<input name="name" required maxLength={100} placeholder="Team member name" /></label><label>{t.staffUserId}<input name="loginId" required autoComplete="off" autoCapitalize="none" spellCheck={false} pattern="[a-zA-Z][a-zA-Z0-9._-]{2,31}" minLength={3} maxLength={32} placeholder="e.g. aden" /></label><label>{t.staffPasscode}<input name="pin" type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} required placeholder="6 digits" /></label>{config.role === 'owner' && <label>{t.role}<select name="role" defaultValue="staff">{roles.map((r) => <option key={r} value={r}>{roleLabels[r]}</option>)}</select></label>}</>}
+    {(config.kind === 'create-table' || config.kind === 'edit-table') && <>
+      {config.kind === 'create-table' ? <label>{t.tableCodeLabel}<input name="code" required maxLength={16} autoCapitalize="none" spellCheck={false} placeholder="01" /><small>{t.tableCodeHelp}</small></label> : <p>{t.tableCodeLabel}: <strong>{config.table.code}</strong><br />{t.tableCodeFixed}</p>}
+      <label>{t.tableLabel}<input name="label" maxLength={80} defaultValue={config.table?.label || ''} placeholder="Table 01" /></label>
+      <label>{t.tableSort}<input name="sort_order" type="number" min="0" max="9999" step="1" required defaultValue={config.table?.sort_order ?? 0} /></label>
+    </>}
     {error && <div className="form-error" role="alert">{error}</div>}<div className="dialog-actions"><button type="button" className="secondary-button" onClick={onClose}>{t.cancel}</button><button className="primary-button" disabled={busy}><Check size={15} />{t.save}</button></div>
   </ValidatedForm></div>
 }

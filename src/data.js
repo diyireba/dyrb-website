@@ -335,6 +335,7 @@ export async function submitService(table, type) {
 export async function getOperations(role) {
   if (!isLive) {
     const state = readState()
+    state.tables = normalizeTables(state.tables)
     state.members = state.members.map((member) => ({ ...member, legacyBeer: state.legacyStoredBalances?.[member.id] || 0, beer: state.storedBatches.filter((batch) => batch.memberId === member.id && batch.quantityRemaining > 0 && (!batch.expiresAt || batch.expiresAt > Date.now())).reduce((sum, batch) => sum + batch.quantityRemaining, 0) }))
     return state
   }
@@ -361,6 +362,63 @@ export async function getOperations(role) {
     result.members = result.members.map((m) => ({ ...m, points: summaryResult.data?.find((x) => x.member_id === m.id)?.points || 0, legacyBeer: summaryResult.data?.find((x) => x.member_id === m.id)?.beer_servings || 0, beer: (batchResult.data || []).filter((x) => x.member_id === m.id && (!x.expires_at || new Date(x.expires_at).getTime() > Date.now())).reduce((sum, x) => sum + x.quantity_remaining, 0) }))
   }
   return result
+}
+
+function normalizeTables(rows = []) {
+  return rows.map((row, index) => typeof row === 'string' ? { id: row, code: row, label: `Table ${row}`, active: true, sort_order: index } : row)
+}
+function tableFields(input, creating = false) {
+  const result = {}
+  if (creating) {
+    const code = String(input.code || '').trim()
+    if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,15}$/.test(code)) throw new Error('Use a table code of 1–16 letters, numbers, underscores or hyphens.')
+    result.code = code
+  } else if (input.code !== undefined) throw new Error('Table codes cannot be changed. Add a new table instead.')
+  if (creating || input.label !== undefined) {
+    const label = String(input.label || '').trim()
+    if (label.length > 80) throw new Error('Table label must be 80 characters or fewer.')
+    result.label = label || (creating ? `Table ${result.code}` : null)
+  }
+  if (creating || input.sort_order !== undefined) {
+    const order = Number(input.sort_order ?? 0)
+    if (!Number.isInteger(order) || order < 0 || order > 9999) throw new Error('Display order must be a whole number from 0 to 9999.')
+    result.sort_order = order
+  }
+  if (input.active !== undefined) {
+    if (typeof input.active !== 'boolean') throw new Error('Choose a valid table status.')
+    result.active = input.active
+  } else if (creating) result.active = true
+  return result
+}
+function tableSaveError(error) {
+  if (error.code === '23505') return new Error('That table code already exists. Select it from the list instead.')
+  if (error.code === '42501' || error.code === 'PGRST116') return new Error('Your account cannot manage this table, or it no longer exists. Refresh and try again.')
+  return new Error('Could not save the table. Check your connection and try again.')
+}
+export async function createTable(input) {
+  const payload = tableFields(input, true)
+  if (!isLive) return mutateState((state) => {
+    state.tables = normalizeTables(state.tables)
+    if (state.tables.some(row => row.code === payload.code)) throw tableSaveError({ code: '23505' })
+    const row = { ...payload, id: uid() }; state.tables.push(row); return row
+  })
+  const { data, error } = await supabase.from('venue_tables').insert(payload).select().single()
+  if (error) throw tableSaveError(error)
+  return data
+}
+export async function updateTable(id, input) {
+  if (!id) throw new Error('Select a table first.')
+  const payload = tableFields(input)
+  if (!Object.keys(payload).length) throw new Error('Choose a table change to save.')
+  if (!isLive) return mutateState((state) => {
+    state.tables = normalizeTables(state.tables)
+    const row = state.tables.find(row => row.id === id)
+    if (!row) throw new Error('Table not found. Refresh and try again.')
+    Object.assign(row, payload); return row
+  })
+  const { data, error } = await supabase.from('venue_tables').update(payload).eq('id', id).select().single()
+  if (error) throw tableSaveError(error)
+  return data
 }
 
 function songFromDb(x) { return { id: x.id, title: x.title, artist: x.artist || '', table: x.table_code, dedication: x.dedication || '', status: x.status, createdAt: new Date(x.created_at).getTime() } }

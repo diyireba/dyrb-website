@@ -29,6 +29,46 @@ test('demo staff user ID matching ignores case and whitespace', async () => {
 test('member accounts cannot enter staff sign-in', async () => {
   await assert.rejects(data.login('0128881001', '246810', 'staff'))
 })
+
+test('table management preserves exact QR codes, creates active tables and rejects duplicates', async () => {
+  storage.clear()
+  const table = await data.createTable({ code: ' 01 ', label: 'Front table', sort_order: '1' })
+  assert.equal(table.code, '01')
+  assert.equal(table.active, true)
+  assert.equal(table.sort_order, 1)
+  assert.equal((await data.getOperations('owner')).tables.find(row => row.id === table.id).label, 'Front table')
+  await assert.rejects(data.createTable({ code: '01' }), /already exists/)
+  // A leading zero is meaningful: never silently change an existing printed QR's code.
+  const eight = await data.createTable({ code: '8' })
+  assert.equal(eight.code, '8')
+  assert.ok((await data.getOperations('owner')).tables.some(row => row.code === '08'))
+})
+
+test('table activation and label edits persist without changing QR identity or existing orders', async () => {
+  storage.clear()
+  const before = await data.getOperations('owner')
+  const original = before.tables.find(row => row.code === '08')
+  await data.updateTable(original.id, { active: false })
+  await data.updateTable(original.id, { label: 'Garden table', sort_order: 25 })
+  let row = (await data.getOperations('owner')).tables.find(row => row.id === original.id)
+  assert.equal(row.active, false)
+  assert.equal(row.code, '08')
+  assert.equal(row.label, 'Garden table')
+  await data.updateTable(original.id, { active: true })
+  const after = await data.getOperations('owner')
+  row = after.tables.find(row => row.id === original.id)
+  assert.equal(row.active, true)
+  assert.deepEqual(after.orders, before.orders)
+})
+
+test('invalid table edits fail without mutating stored rows', async () => {
+  storage.clear()
+  const original = (await data.getOperations('owner')).tables
+  for (const update of [{ code: '99' }, { active: 'false' }, { sort_order: -1 }, { sort_order: 1.5 }, { label: 'x'.repeat(81) }]) await assert.rejects(data.updateTable('08', update))
+  for (const code of ['', '../08', 'table 08', 'x'.repeat(17)]) await assert.rejects(data.createTable({ code }))
+  await assert.rejects(data.updateTable('missing', { active: true }), /not found/)
+  assert.deepEqual((await data.getOperations('owner')).tables, original)
+})
 test('negative points adjustment is rejected without changing balance', async () => {
   storage.clear()
   const member = (await data.getOperations('owner')).members[0]

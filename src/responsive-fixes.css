@@ -566,3 +566,11 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .event-name-field { display: grid; gap: 8px; }
 .event-name-field input { width: 100%; min-width: 0; box-sizing: border-box; }
 .event-menu-banner strong, .event-settings h2 { overflow-wrap: anywhere; }
+
+.table-manage-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:12px}
+.table-manage-actions .secondary-button{min-height:44px;white-space:normal}
+.qr-preview-card .qr-url-label{overflow-wrap:anywhere}
+.qr-preview-card .qr-inactive{color:var(--muted)}
+.qr-preview-card .qr-inactive i{background:var(--quiet)}
+.qr-preview-card>p{overflow-wrap:anywhere}
+@media(max-width:760px){.table-manage-actions>*{flex:1 1 140px}.table-code-grid button{min-height:64px}}
