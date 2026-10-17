@@ -1,23 +1,23 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import {
-  Activity, ArrowDownLeft, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Beer, Bell, Check,
+  Activity, ArrowDownLeft, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Beer, Check,
   CheckCircle2, ChevronDown, ChevronRight, CircleHelp, ClipboardList, Clock3, Coffee, Crown,
-  Disc3, GlassWater, Guitar, Heart, Languages, LayoutDashboard, LogOut, Menu as MenuIcon,
+  Disc3, Guitar, Heart, Languages, LayoutDashboard, LogOut, Menu as MenuIcon,
   Minus, Music2, Plus, QrCode, Search, Send, Settings2, Shield, ShoppingBag, SlidersHorizontal,
-  Sparkles, Ticket, UserRound, Users, Utensils, Wallet, X, Zap,
+  Sparkles, Ticket, UserRound, Users, Utensils, X, Zap,
 } from 'lucide-react'
 import {
   adminAction, adjustMember, demoPermissionMap, formatMoney, getMemberStoredItems, getMenu, getOperations, getPermissions,
   isLive, listenForDemoChanges, login, logout, permissionLabels, roles, roleLabels, saveMenuAvailability,
-  savePermission, storedDrinkCatalog, submitOrder, submitService, submitSong, supabase, timeAgo, updateOrder, updateService,
+  savePermission, storedDrinkCatalog, submitOrder, submitSong, supabase, timeAgo, updateOrder,
   updateSong, addSingerSong, saveMenuEvent, eventIsActive, createTable, updateTable,
 } from './data.js'
 
 const copy = {
   en: {
     viewOrder: 'View order', itemSingle: 'item', itemPlural: 'items', searchDrinks: 'Search all beverages', clearSearch: 'Clear search', noDrinksFound: 'No beverages match your search.', removeItem: 'Remove', addOne: 'Add one', removeOne: 'Remove one', addedToOrder: 'added to your order', orderSentTitle: 'Order sent to staff', orderSentHelp: 'Your order is with our team. You do not need to send it again.', backToMenu: 'Back to menu', reviewOrder: 'Review your order', confirmTable: 'Ordering for table',
-    addTable: 'Add table', editTable: 'Edit table', tableLabel: 'Table label', tableCodeLabel: 'Table code', tableSort: 'Display order', tableActive: 'Active', tableInactive: 'Inactive', activateTable: 'Activate table', deactivateTable: 'Deactivate table', tableListHelp: 'Select a table to manage its QR code.', tableCodeHelp: 'Use 01 or A1. Codes must match printed QR links exactly.', tableCodeFixed: 'The code stays fixed so printed QR codes keep working.', tableInactiveHelp: 'Customers can browse, but orders and requests are disabled for this table.', tableActiveHelp: 'Customers can send orders, song requests and service requests.', downloadQr: 'Download QR', noTables: 'No tables yet. Add your first table to create a QR code.', deactivateTableHelp: 'New orders and requests will be blocked for this table. Existing records stay available.', activateTableHelp: 'Customers using this table QR will be able to send orders and requests.', scanToOrder: 'Scan to order',
+    addTable: 'Add table', editTable: 'Edit table', tableLabel: 'Table label', tableCodeLabel: 'Table code', tableSort: 'Display order', tableActive: 'Active', tableInactive: 'Inactive', activateTable: 'Activate table', deactivateTable: 'Deactivate table', tableListHelp: 'Select a table to manage its QR code.', tableCodeHelp: 'Use 01 or A1. Codes must match printed QR links exactly.', tableCodeFixed: 'The code stays fixed so printed QR codes keep working.', tableInactiveHelp: 'Customers can browse, but orders and requests are disabled for this table.', tableActiveHelp: 'Customers can send orders and song requests.', downloadQr: 'Download QR', noTables: 'No tables yet. Add your first table to create a QR code.', deactivateTableHelp: 'New orders and requests will be blocked for this table. Existing records stay available.', activateTableHelp: 'Customers using this table QR will be able to send orders and requests.', scanToOrder: 'Scan to order',
     menu: 'Menu', songs: 'Songs', member: 'Member', liveMusic: 'Live music every night',
     guestTitle: 'Order from your table', guestCopy: 'Browse the menu, request a song, or call our team.',
     table: 'TABLE', menuTitle: 'Browse the menu', menuCopy: 'Food and drinks, ordered from your table.',
@@ -231,7 +231,7 @@ function localizedMenuPeriod(item, language) {
 
 const navMeta = {
   overview: { icon: LayoutDashboard, permission: null }, songs: { icon: Music2, permission: 'songs.view' },
-  orders: { icon: ClipboardList, permission: 'orders.view' }, service: { icon: Bell, permission: 'service.view' },
+  orders: { icon: ClipboardList, permission: 'orders.view' },
   members: { icon: Users, permission: 'members.lookup' }, menu: { icon: Utensils, permission: 'menu.view' },
   staff: { icon: UserRound, permission: 'staff.manage' }, tables: { icon: QrCode, permission: 'tables.manage' },
   permissions: { icon: Shield, permission: 'permissions.manage' },
@@ -242,7 +242,7 @@ const beveragePhotoClasses = {
   mocktails: 'beverage-photo-mocktails', soft: 'beverage-photo-soft', spirits: 'beverage-photo-spirits',
 }
 
-const staffSections = new Set(['overview', 'songs', 'orders', 'service', 'members', 'menu', 'staff', 'tables', 'permissions'])
+const staffSections = new Set(['overview', 'songs', 'orders', 'members', 'menu', 'staff', 'tables', 'permissions'])
 
 function routeState(pathname = window.location.pathname, search = window.location.search) {
   const path = pathname.replace(/\/+$/, '') || '/'
@@ -386,7 +386,7 @@ function App() {
     setSession(user)
     if (user.type === 'staff') {
       const perms = await getPermissions(user.role)
-      const first = (user.role === 'singer' ? ['songs'] : ['overview', 'songs', 'orders', 'service', 'members', 'menu', 'staff', 'tables', 'permissions']).find((key) => !navMeta[key]?.permission || perms.includes(navMeta[key].permission))
+      const first = (user.role === 'singer' ? ['songs'] : ['overview', 'songs', 'orders', 'members', 'menu', 'staff', 'tables', 'permissions']).find((key) => !navMeta[key]?.permission || perms.includes(navMeta[key].permission))
       navigateStaffSection(first || 'songs')
     } else navigate(`/member/account?table=${encodeURIComponent(tableCode)}`)
   }
@@ -432,8 +432,6 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
   const [songForm, setSongForm] = useState({ title: '', artist: '', dedication: '' })
   const [sending, setSending] = useState(false)
   const [songSent, setSongSent] = useState(false)
-  const [serviceSent, setServiceSent] = useState('')
-  const [serviceBusy, setServiceBusy] = useState(false)
   const [menuError, setMenuError] = useState('')
   const [menuLoading, setMenuLoading] = useState(true)
   const loadMenu = useCallback(async () => {
@@ -537,13 +535,6 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
     try { await submitSong({ ...songForm, title: songForm.title.trim(), artist: songForm.artist.trim(), table: tableCode }); setSongForm({ title: '', artist: '', dedication: '' }); setSongSent(true); notify(t.requestSuccess) }
     catch (error) { notify(error.message, 'error') } finally { setSending(false) }
   }
-  async function requestService(type) {
-    if (!tableCode) { notify('Scan the QR code at your table or speak to staff.'); return }
-    if (serviceBusy) return
-    setServiceBusy(true)
-    try { await submitService(tableCode, type); setServiceSent(type); notify(t.serviceReceived) }
-    catch (error) { notify(error.message, 'error') } finally { setServiceBusy(false) }
-  }
 
   function renderCartLine({ item, qty }) {
     const name = localizedMenuName(item, language)
@@ -616,10 +607,6 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
           {!cart.length ? <div className="empty-cart"><span className="empty-cart-icon"><ShoppingBag size={23} /></span><p>{t.emptyCart}</p><span>{t.noCharge}</span></div> : <div className="cart-lines">{cart.map(renderCartLine)}</div>}
           {cart.length > 0 && <><div className="cart-subtotal"><span>{t.subtotal}</span><strong>{formatMoney(total)}</strong></div><button className="primary-button full checkout-button" onClick={sendOrder} disabled={sending}>{sending ? t.loading : <>{`${t.payCounter} · ${t.table} ${tableCode}`}<ArrowRight size={16} /></>}</button></>}
           {!cart.length && <button className="secondary-button full browse-button" onClick={() => { setTab('menu'); document.querySelector('.guest-section-heading')?.scrollIntoView({ behavior: 'smooth' }) }}>{language === 'zh' ? t.browseMenu : 'Browse the menu'}<ArrowRight size={15} /></button>}
-        </div>
-        <div className="service-panel"><div className="service-header"><span className="service-icon"><Bell size={17} /></span><div><span className="section-eyebrow">{language === 'zh' ? t.serviceKicker : 'AT YOUR SERVICE'}</span><h3>{t.help}</h3></div></div>
-          <div className="service-actions"><button disabled={serviceBusy} onClick={() => requestService('Request water')}><span><GlassWater size={16} />{t.water}</span><ChevronRight size={15} /></button><button disabled={serviceBusy} onClick={() => requestService('Request the bill')}><span><Wallet size={16} />{t.bill}</span><ChevronRight size={15} /></button></div>
-          {serviceSent && <div className="service-confirm"><Check size={13} />{t.serviceReceived}</div>}
         </div>
         <div className="rail-footer"><span><Shield size={14} />{language === 'zh' ? t.footerPromise : 'Your table · your night'}</span><span>DYRB · MALAYSIA</span></div>
       </aside>
@@ -721,7 +708,7 @@ function StaffLogin({ t, language, onLanguage, onBack, onLogin, notify }) {
     </div></main>
 }
 
-const sectionLabels = { overview: 'overview', songs: 'liveQueue', orders: 'orders', service: 'serviceRequests', members: 'members', menu: 'menuAdmin', staff: 'team', tables: 'tableQr', permissions: 'permissions' }
+const sectionLabels = { overview: 'overview', songs: 'liveQueue', orders: 'orders', members: 'members', menu: 'menuAdmin', staff: 'team', tables: 'tableQr', permissions: 'permissions' }
 
 function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSection, onSignOut, notify }) {
   const [data, setData] = useState(null)
@@ -734,7 +721,7 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
   const actionLock = useRef(false)
   const refreshFlight = useRef(null)
   const allowedNav = useMemo(() => {
-    const keys = user.role === 'singer' ? ['songs'] : ['overview', 'songs', 'orders', 'service', 'members', 'menu', 'staff', 'tables', 'permissions']
+    const keys = user.role === 'singer' ? ['songs'] : ['overview', 'songs', 'orders', 'members', 'menu', 'staff', 'tables', 'permissions']
     return keys.filter((key) => key === 'overview' || permissions.includes(navMeta[key].permission))
   }, [user.role, permissions])
   const refresh = useCallback(() => {
@@ -773,18 +760,16 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
     finally { actionLock.current = false; setBusy(false) }
   }
   const can = (permission) => permissions.includes(permission)
-  const navNames = { overview: t.overview, songs: t.liveQueue, orders: t.orders, service: t.serviceRequests, members: t.members, menu: t.menuAdmin, staff: t.team, tables: t.tableQr, permissions: t.permissions }
+  const navNames = { overview: t.overview, songs: t.liveQueue, orders: t.orders, members: t.members, menu: t.menuAdmin, staff: t.team, tables: t.tableQr, permissions: t.permissions }
   const pendingOrders = data?.orders?.filter((o) => !['served', 'cancelled'].includes(o.status)).length || 0
-  const openServices = data?.services?.filter((x) => x.status === 'open').length || 0
   const pendingSongs = data?.songs?.filter((x) => x.status === 'pending').length || 0
   return <div className="dashboard-layout">
-    <aside className="dashboard-sidebar"><div className="sidebar-brand"><Brand compact /></div><div className="sidebar-venue"><span className="venue-avatar">D</span><div><strong>DYRB</strong><small>第一热吧 · Malaysia</small></div><ChevronDown size={15} /></div><div className="sidebar-section-label">{t.operations}</div><nav className="dashboard-nav">{allowedNav.map((key) => { const Icon = navMeta[key].icon; const count = key === 'songs' ? pendingSongs : key === 'orders' ? pendingOrders : key === 'service' ? openServices : 0; return <button key={key} className={activeSection === key ? 'active' : ''} onClick={() => setActiveSection(key)}><Icon size={17} strokeWidth={1.7} /><span>{navNames[key]}</span>{count > 0 && <em>{count}</em>}</button> })}</nav><div className="sidebar-bottom"><div className="sidebar-profile"><div className={`profile-avatar avatar-${user.role}`}>{user.name?.slice(0, 1) || 'M'}</div><div><strong>{user.name}</strong><small>{roleLabels[user.role]}</small></div><button title={t.signOut} onClick={onSignOut}><LogOut size={16} /></button></div><div className="sidebar-mode"><span className={`mode-led ${isLive ? 'live' : ''}`} />{isLive ? t.liveMode : t.demoMode}</div></div></aside>
+    <aside className="dashboard-sidebar"><div className="sidebar-brand"><Brand compact /></div><div className="sidebar-venue"><span className="venue-avatar">D</span><div><strong>DYRB</strong><small>第一热吧 · Malaysia</small></div><ChevronDown size={15} /></div><div className="sidebar-section-label">{t.operations}</div><nav className="dashboard-nav">{allowedNav.map((key) => { const Icon = navMeta[key].icon; const count = key === 'songs' ? pendingSongs : key === 'orders' ? pendingOrders : 0; return <button key={key} className={activeSection === key ? 'active' : ''} onClick={() => setActiveSection(key)}><Icon size={17} strokeWidth={1.7} /><span>{navNames[key]}</span>{count > 0 && <em>{count}</em>}</button> })}</nav><div className="sidebar-bottom"><div className="sidebar-profile"><div className={`profile-avatar avatar-${user.role}`}>{user.name?.slice(0, 1) || 'M'}</div><div><strong>{user.name}</strong><small>{roleLabels[user.role]}</small></div><button title={t.signOut} onClick={onSignOut}><LogOut size={16} /></button></div><div className="sidebar-mode"><span className={`mode-led ${isLive ? 'live' : ''}`} />{isLive ? t.liveMode : t.demoMode}</div></div></aside>
     <main className="dashboard-main"><header className="dashboard-topbar"><div className="breadcrumb"><span>{t.operations}</span><ChevronRight size={14} /><strong>{navNames[activeSection] || t.overview}</strong></div><div className="topbar-actions"><LanguageSwitch language={language} setLanguage={onLanguage} /><button className="topbar-signout" aria-label={t.signOut} title={t.signOut} onClick={onSignOut}><LogOut size={17} /></button><div className="topbar-avatar">{user.name?.slice(0, 1) || 'M'}</div></div></header>
       <div className="dashboard-content">{loadError && <div className="form-error" role="alert">{loadError}<button className="secondary-button" onClick={refresh}>Try again</button></div>}{loading && !data ? <div className="loading-screen"><div className="loader-ring" />{t.loading}</div> : data ? <>
         {activeSection === 'overview' && <OverviewPage user={user} data={data} permissions={permissions} setActiveSection={setActiveSection} />}
         {activeSection === 'songs' && <SongsPage data={data} canManage={can('songs.manage')} t={t} run={run} busy={busy} setDialog={setDialog} />}
         {activeSection === 'orders' && <OrdersPage language={language} data={data} canManage={can('orders.manage')} t={t} run={run} busy={busy} />}
-        {activeSection === 'service' && <ServicePage data={data} canManage={can('service.manage')} t={t} run={run} busy={busy} />}
         {activeSection === 'members' && <MembersPage data={data} canAdjust={can('members.adjust')} canEnroll={can('members.enroll')} t={t} search={search} setSearch={setSearch} run={run} busy={busy} setDialog={setDialog} />}
         {activeSection === 'menu' && <MenuAdminPage data={data} canManage={can('menu.manage')} t={t} run={run} busy={busy} />}
         {activeSection === 'staff' && <StaffPage data={data} role={user.role} userId={user.id} t={t} run={run} busy={busy} setDialog={setDialog} />}
@@ -799,15 +784,13 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
 function OverviewPage({ user, data, permissions, setActiveSection }) {
   const songCount = data?.songs?.filter((x) => x.status === 'pending').length || 0
   const orderCount = data?.orders?.filter((x) => !['served', 'cancelled'].includes(x.status)).length || 0
-  const serviceCount = data?.services?.filter((x) => x.status === 'open').length || 0
   const modules = [
     { key: 'songs', label: 'Song requests', value: songCount, unit: 'waiting for a decision', icon: Music2, tone: 'gold', permission: 'songs.view' },
     { key: 'orders', label: 'Active orders', value: orderCount, unit: 'on the floor', icon: ShoppingBag, tone: 'blue', permission: 'orders.view' },
-    { key: 'service', label: 'Table requests', value: serviceCount, unit: 'need attention', icon: Bell, tone: 'rose', permission: 'service.view' },
   ].filter((x) => permissions.includes(x.permission))
   return <div className="page-stack"><div className="page-heading-row"><div><span className="section-eyebrow">{roleLabels[user.role]}</span><h1>{`Welcome back, ${user.name?.split(' ')[0] || roleLabels[user.role]}.`}</h1><p>Orders, song requests and table calls in one place.</p></div><div className="live-session-pill"><span className="live-dot" />Live music</div></div>
     <div className={`summary-grid summary-${modules.length}`}>{modules.map(({ key, label, value, unit, icon: Icon, tone }) => <button className="summary-card" key={key} onClick={() => setActiveSection(key)}><div className="summary-card-top"><span className={`summary-icon ${tone}`}><Icon size={18} /></span><ArrowUpRight size={16} /></div><strong>{value}</strong><span className="summary-label">{label}</span><small>{unit}</small></button>)}</div>
-    <div className="overview-lower">{permissions.includes('songs.view') && <section className="surface-card overview-queue"><div className="card-title-row"><div><span className="section-eyebrow">GUEST REQUESTS</span><h2>Song queue</h2></div><button className="text-link" onClick={() => setActiveSection('songs')}>View requests<ArrowRight size={14} /></button></div>{data?.songs?.filter((x) => ['pending', 'approved', 'singing'].includes(x.status)).slice(0, 4).map((song, i) => <div className="mini-song-row" key={song.id}><span className="song-position">{String(i + 1).padStart(2, '0')}</span><span className="mini-song-disc"><Disc3 size={17} /></span><div className="mini-song-copy"><strong>{song.title}</strong><small>{song.artist}</small></div><span className={`status-pill ${song.status}`}>{song.status}</span><span className="mini-song-table">T{song.table}</span></div>)}{!songCount && <p className="overview-empty-note">No song requests waiting.</p>}</section>}<section className="surface-card overview-quick-links"><h2>Quick links</h2>{permissions.includes('orders.view') && <button onClick={() => setActiveSection('orders')}><ShoppingBag size={17} /><span>Orders</span><strong>{orderCount}</strong><ChevronRight size={16} /></button>}{permissions.includes('service.view') && <button onClick={() => setActiveSection('service')}><Bell size={17} /><span>Table calls</span><strong>{serviceCount}</strong><ChevronRight size={16} /></button>}</section></div>
+    <div className="overview-lower">{permissions.includes('songs.view') && <section className="surface-card overview-queue"><div className="card-title-row"><div><span className="section-eyebrow">GUEST REQUESTS</span><h2>Song queue</h2></div><button className="text-link" onClick={() => setActiveSection('songs')}>View requests<ArrowRight size={14} /></button></div>{data?.songs?.filter((x) => ['pending', 'approved', 'singing'].includes(x.status)).slice(0, 4).map((song, i) => <div className="mini-song-row" key={song.id}><span className="song-position">{String(i + 1).padStart(2, '0')}</span><span className="mini-song-disc"><Disc3 size={17} /></span><div className="mini-song-copy"><strong>{song.title}</strong><small>{song.artist}</small></div><span className={`status-pill ${song.status}`}>{song.status}</span><span className="mini-song-table">T{song.table}</span></div>)}{!songCount && <p className="overview-empty-note">No song requests waiting.</p>}</section>}<section className="surface-card overview-quick-links"><h2>Quick links</h2>{permissions.includes('orders.view') && <button onClick={() => setActiveSection('orders')}><ShoppingBag size={17} /><span>Orders</span><strong>{orderCount}</strong><ChevronRight size={16} /></button>}</section></div>
     <div className="dashboard-footnote"><span><Activity size={15} />Updates as your team works</span></div></div>
 }
 
@@ -854,12 +837,6 @@ function OrdersPage({ data, canManage, t, run, busy, language }) {
   </div>
 }
 
-function ServicePage({ data, canManage, t, run, busy }) {
-  const services = [...(data?.services || [])].sort((a, b) => b.createdAt - a.createdAt)
-  const open = services.filter((x) => x.status === 'open')
-  const done = services.filter((x) => x.status !== 'open')
-  return <div className="page-stack"><div className="page-heading-row"><div><span className="section-eyebrow">GUEST REQUESTS</span><h1>{t.serviceTitle}</h1><p>{t.serviceSub}</p></div><span className="open-count"><span className="live-dot" />{open.length} open</span></div><section className="service-request-list">{open.map((item) => <article className="service-request-card" key={item.id}><div className={`request-type-icon ${item.type.includes('water') ? 'water' : item.type.includes('bill') ? 'bill' : 'call'}`}>{item.type.includes('water') ? <GlassWater size={19} /> : item.type.includes('bill') ? <Wallet size={19} /> : <Bell size={19} />}</div><div className="service-request-main"><span className="section-eyebrow">TABLE {item.table} · {timeAgo(item.createdAt)}</span><h3>{item.type}</h3></div>{canManage && <button className="secondary-button" disabled={busy} onClick={() => run(() => updateService(item.id, 'done'))}><Check size={15} />{t.closeRequest}</button>}</article>)}{!open.length && <EmptyState icon={CheckCircle2} title={t.noService} />}</section>{done.length > 0 && <section className="completed-requests"><div className="section-eyebrow">RECENTLY COMPLETED</div>{done.slice(0, 4).map((item) => <div key={item.id}><CheckCircle2 size={15} /><span>{item.type}</span><strong>Table {item.table}</strong><small>{timeAgo(item.createdAt)}</small></div>)}</section>}</div>
-}
 
 function MembersPage({ data, canAdjust, canEnroll, t, search, setSearch, run, busy, setDialog }) {
   const [selectedMember, setSelectedMember] = useState(null)
@@ -931,7 +908,7 @@ function PermissionsPage({ data, t, busy, run }) {
     return isLive ? false : (data?.permissions?.[role] || []).includes(key)
   }
   const groups = [
-    { name: 'Guest operations', permissions: ['orders.view', 'orders.manage', 'songs.view', 'songs.manage', 'service.view', 'service.manage'] },
+    { name: 'Guest operations', permissions: ['orders.view', 'orders.manage', 'songs.view', 'songs.manage'] },
     { name: 'Venue setup', permissions: ['menu.view', 'menu.manage', 'tables.manage'] },
     { name: 'Membership', permissions: ['members.lookup', 'members.enroll', 'members.adjust'] },
     { name: 'Administration', permissions: ['staff.manage', 'permissions.manage'] },

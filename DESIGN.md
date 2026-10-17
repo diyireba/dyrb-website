@@ -29,3 +29,5 @@ Make the guest menu feel like DYRB's night-time bar: charcoal surfaces, bright o
 ## Tokens
 
 The staff workspace tokens live in `src/modern.css`: warm canvas `#f6f4ef`, white surfaces, charcoal text, and DYRB orange-red `#e64d2e`. The guest menu overrides those tokens in `src/responsive-fixes.css` with charcoal `#171717`, raised charcoal surfaces, white text, and orange-red `#f04e32` to match the approved mobile concept. Existing component styles are local to `src/App.jsx`, `src/styles.css`, `src/modern.css`, and `src/responsive-fixes.css`.
+
+Service requests are retired: no customer water/bill/help panel, staff Service navigation, overview card, or service permission controls. The submission endpoint rejects requests from older clients once disable-service-requests.sql is applied.

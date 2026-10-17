@@ -10,7 +10,6 @@ export const roleLabels = { owner: 'Owner', boss: 'Boss', manager: 'Manager', st
 export const permissionLabels = {
   'orders.view': 'View orders', 'orders.manage': 'Manage orders',
   'songs.view': 'View song requests', 'songs.manage': 'Manage song queue',
-  'service.view': 'View service requests', 'service.manage': 'Manage service requests',
   'menu.view': 'View menu', 'menu.manage': 'Manage menu',
   'members.lookup': 'Look up members', 'members.adjust': 'Adjust points and beer balance',
   'members.enroll': 'Enroll members in person',
@@ -20,9 +19,9 @@ export const permissionLabels = {
 
 const defaultPermissions = {
   owner: Object.keys(permissionLabels),
-  boss: ['orders.view', 'orders.manage', 'songs.view', 'songs.manage', 'service.view', 'service.manage', 'menu.view', 'menu.manage', 'members.lookup', 'members.adjust', 'members.enroll', 'staff.manage', 'tables.manage'],
-  manager: ['orders.view', 'orders.manage', 'songs.view', 'songs.manage', 'service.view', 'service.manage', 'menu.view', 'menu.manage', 'members.lookup', 'members.adjust', 'members.enroll'],
-  staff: ['orders.view', 'orders.manage', 'service.view', 'service.manage', 'members.lookup', 'members.enroll'],
+  boss: ['orders.view', 'orders.manage', 'songs.view', 'songs.manage', 'menu.view', 'menu.manage', 'members.lookup', 'members.adjust', 'members.enroll', 'staff.manage', 'tables.manage'],
+  manager: ['orders.view', 'orders.manage', 'songs.view', 'songs.manage', 'menu.view', 'menu.manage', 'members.lookup', 'members.adjust', 'members.enroll'],
+  staff: ['orders.view', 'orders.manage', 'members.lookup', 'members.enroll'],
   singer: ['songs.view', 'songs.manage'],
 }
 export const demoPermissionMap = defaultPermissions
@@ -325,11 +324,8 @@ export async function submitOrder(table, items) {
   return data
 }
 
-export async function submitService(table, type) {
-  if (!isLive) return mutateState((s) => { const existing = s.services.find(x => x.table === table && x.type === type && x.status === 'open'); if (existing) return existing; const row = { id: uid(), table, type, status: 'open', createdAt: Date.now() }; s.services.unshift(row); return row })
-  const { data, error } = await supabase.rpc('submit_service_request', { p_table_code: table, p_request_type: type })
-  if (error) throw error
-  return data
+export async function submitService() {
+  throw new Error('This service request is no longer available.')
 }
 
 export async function getOperations(role) {
@@ -345,7 +341,6 @@ export async function getOperations(role) {
   if (permissions.includes('menu.view')) requests.push(supabase.from('menu_events').select('*').eq('id', 'halloween').single().then(({ data, error }) => { if (error) throw error; result.menuEvent = data }))
   if (permissions.includes('songs.view')) requests.push(supabase.from('song_requests').select('*').order('created_at', { ascending: false }).limit(100).then(({ data, error }) => { if (error) throw error; result.songs = data.map(songFromDb) }))
   if (permissions.includes('orders.view')) requests.push(supabase.from('orders').select('*, order_items(*)').order('created_at', { ascending: false }).limit(100).then(({ data, error }) => { if (error) throw error; result.orders = data.map(orderFromDb) }))
-  if (permissions.includes('service.view')) requests.push(supabase.from('service_requests').select('*').order('created_at', { ascending: false }).limit(100).then(({ data, error }) => { if (error) throw error; result.services = data.map(serviceFromDb) }))
   if (permissions.includes('members.lookup')) requests.push(supabase.from('members').select('id, display_name, phone, active').order('created_at', { ascending: false }).limit(100).then(({ data, error }) => { if (error) throw error; result.members = (data || []).map((x) => ({ id: x.id, name: x.display_name, phone: x.phone, active: x.active })) }))
   if (permissions.includes('menu.view')) requests.push(supabase.from('menu_items').select('*').order('sort_order').then(({ data, error }) => { if (error) throw error; result.menu = (data || []).map((x) => ({ id: x.id, eventId: x.event_id, category: x.category, name: x.name_en, bm: x.name_bm, description: x.event_id && x.description_en === 'Halloween Night' ? '' : x.description_en, descriptionBm: x.description_bm, price: Number(x.price), available: x.available, image: menuPhoto(x), tag: x.tag || '' })) }))
   if (permissions.includes('tables.manage')) requests.push(supabase.from('venue_tables').select('*').order('sort_order').then(({ data, error }) => { if (error) throw error; result.tables = data || [] }))

@@ -11,7 +11,7 @@ Guest service controls offer Request water and Ask for the bill. Call staff was 
 1. A guest scans the code at their table and sees that table number.
 2. They browse food or beverages and add items without leaving the menu.
 3. They can open the basket, review the total, and send the order to staff for payment at the venue.
-4. They can submit a song request or ask staff for help from the same page.
+4. They can submit a song request from the same page.
 5. A member can sign in with phone number and PIN to view their own balances.
 
 Customer ordering improvements preserve the compact food photography. Menu filter controls stay accessible while scrolling; beverage search covers all visible beverage categories and respects current draught pricing periods. Category selection clears search. Mobile basket bars are hidden when empty and show item count, total and table when populated; they sit above a reserved hosting-badge area. Desktop and mobile reuse `renderCartLine` for removal and quantity edits, with a limit of 20 per menu variant. Add confirmation uses the shared notification owner. `orderSendLock` blocks simultaneous submit activations; it does not promise network-level idempotency if a response is lost. Basket clearing and the table/item receipt happen only after successful server acknowledgement; failures preserve the basket. Confirmation and basket use the existing modal focus/keyboard owner, and staff access is moved into the guest footer. New copy is maintained in English, Bahasa Malaysia and Chinese.
@@ -61,3 +61,5 @@ Staff use individually assigned accounts. The dashboard shows only the sections 
 Source: user request, 17 October 2026; `supabase/event-menu.sql` owns permissions and visibility. Menu managers can enable Halloween Night manually with optional start/end bounds. Active event food replaces regular food. The end bound is exclusive. Drinks stay unchanged except cocktails and soft drinks, which require explicit inclusion. Event status defaults off. Date controls use native datetime-local inputs (platform calendar accepted), with explicit Malaysia timezone conversion; shared ValidatedForm and Dashboard run own validation and feedback. Drafts survive failed saves. Guest menu polls every 30 seconds and is revalidated on submission; database trigger rejects hidden items even for stale clients.
 
 Event names are editable in the existing event-settings form (user request, 17 October 2026). Save validates a trimmed 1–80 character name, preserves the catalog and schedule, and supplies the saved name to staff labels and the guest banner. `supabase/event-menu-name.sql` adds database validation and a public RPC that reveals only the active event name.
+
+Service requests are retired: no customer water/bill/help panel, staff Service navigation, overview card, or service permission controls. The submission endpoint rejects requests from older clients once disable-service-requests.sql is applied.

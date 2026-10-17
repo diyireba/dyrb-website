@@ -35,18 +35,8 @@ $$;
 
 create or replace function public.submit_service_request(p_table_code text, p_request_type text)
 returns jsonb language plpgsql security definer set search_path = public, pg_temp as $$
-declare v_id uuid;
 begin
-  if not exists (select 1 from public.venue_tables where code = p_table_code and active) then raise exception 'This table QR is not active.'; end if;
-  if p_request_type is null or p_request_type not in ('Call staff','Request water','Request the bill') then raise exception 'Unknown service request.'; end if;
-  perform pg_advisory_xact_lock(hashtextextended(p_table_code || ':' || p_request_type, 0));
-  select id into v_id from public.service_requests
-  where table_code=p_table_code and request_type=p_request_type and status='open'
-  order by created_at desc limit 1;
-  if v_id is null then
-    insert into public.service_requests(table_code,request_type) values (p_table_code,p_request_type) returning id into v_id;
-  end if;
-  return jsonb_build_object('id',v_id,'status','open');
+  raise exception 'Service requests are no longer available. Please speak to staff.';
 end;
 $$;
 

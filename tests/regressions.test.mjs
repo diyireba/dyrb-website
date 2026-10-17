@@ -82,11 +82,10 @@ test('stored drink collection cannot exceed available quantity', async () => {
 test('formatted duplicate member phone is rejected', async () => {
   await assert.rejects(data.adminAction('enroll-member', { name: 'Test', phone: '+60 128881001', pin: '123456' }), /already enrolled/)
 })
-test('repeated service calls keep a single open request', async () => {
-  const first = await data.submitService('08', 'Call staff')
-  const second = await data.submitService('08', 'Call staff')
-  assert.equal(first.id, second.id)
-  assert.equal((await data.getOperations('owner')).services.filter(x => x.table === '08' && x.type === 'Call staff' && x.status === 'open').length, 1)
+test('all service requests are disabled', async () => {
+  for (const type of ['Request water', 'Request the bill', 'Call staff']) {
+    await assert.rejects(data.submitService('08', type), /no longer available/)
+  }
 })
 
 process.env.SUPABASE_URL = 'https://test.example.com'
@@ -204,4 +203,12 @@ test('older saved draught entries receive photos without changing prices', async
   assert.equal(beer.image, '/images/drink-draught-carlsberg-extra-cold.webp')
   assert.equal(beer.price,15.8)
   storage.clear()
+})
+
+
+test('removed Call staff requests are rejected without creating a service record', async () => {
+  storage.clear()
+  const before = (await data.getOperations('owner')).services
+  await assert.rejects(data.submitService('08', 'Call staff'), /no longer available/)
+  assert.deepEqual((await data.getOperations('owner')).services, before)
 })
