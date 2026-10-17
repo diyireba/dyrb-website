@@ -4,7 +4,7 @@ import {
   Activity, ArrowDownLeft, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Beer, Bell, Check,
   CheckCircle2, ChevronDown, ChevronRight, CircleHelp, ClipboardList, Clock3, Coffee, Crown,
   Disc3, GlassWater, Guitar, Heart, Languages, LayoutDashboard, LogOut, Menu as MenuIcon,
-  Minus, Music2, Plus, QrCode, Search, Send, Settings2, Shield, ShoppingBag, ShoppingCart, SlidersHorizontal,
+  Minus, Music2, Plus, QrCode, Search, Send, Settings2, Shield, ShoppingBag, SlidersHorizontal,
   Sparkles, Ticket, UserRound, Users, Utensils, Wallet, X, Zap,
 } from 'lucide-react'
 import {
@@ -16,6 +16,7 @@ import {
 
 const copy = {
   en: {
+    viewOrder: 'View order', itemSingle: 'item', itemPlural: 'items', searchDrinks: 'Search all beverages', clearSearch: 'Clear search', noDrinksFound: 'No beverages match your search.', removeItem: 'Remove', addOne: 'Add one', removeOne: 'Remove one', addedToOrder: 'added to your order', orderSentTitle: 'Order sent to staff', orderSentHelp: 'Your order is with our team. You do not need to send it again.', backToMenu: 'Back to menu', reviewOrder: 'Review your order', confirmTable: 'Ordering for table',
     addTable: 'Add table', editTable: 'Edit table', tableLabel: 'Table label', tableCodeLabel: 'Table code', tableSort: 'Display order', tableActive: 'Active', tableInactive: 'Inactive', activateTable: 'Activate table', deactivateTable: 'Deactivate table', tableListHelp: 'Select a table to manage its QR code.', tableCodeHelp: 'Use 01 or A1. Codes must match printed QR links exactly.', tableCodeFixed: 'The code stays fixed so printed QR codes keep working.', tableInactiveHelp: 'Customers can browse, but orders and requests are disabled for this table.', tableActiveHelp: 'Customers can send orders, song requests and service requests.', downloadQr: 'Download QR', noTables: 'No tables yet. Add your first table to create a QR code.', deactivateTableHelp: 'New orders and requests will be blocked for this table. Existing records stay available.', activateTableHelp: 'Customers using this table QR will be able to send orders and requests.', scanToOrder: 'Scan to order',
     menu: 'Menu', songs: 'Songs', member: 'Member', liveMusic: 'Live music every night',
     guestTitle: 'Order from your table', guestCopy: 'Browse the menu, request a song, or call our team.',
@@ -52,6 +53,7 @@ const copy = {
     orderReceived: 'Order sent. Our team has been notified.', serviceReceived: 'The team has been notified.', singerAdded: 'Added to the queue.', demoReset: 'Demo data is saved in this browser.',
   },
   bm: {
+    viewOrder: 'Lihat pesanan', itemSingle: 'item', itemPlural: 'item', searchDrinks: 'Cari semua minuman', clearSearch: 'Padam carian', noDrinksFound: 'Tiada minuman sepadan dengan carian anda.', removeItem: 'Buang', addOne: 'Tambah satu', removeOne: 'Kurangkan satu', addedToOrder: 'ditambah ke pesanan anda', orderSentTitle: 'Pesanan dihantar kepada staf', orderSentHelp: 'Pasukan kami telah menerima pesanan anda. Tidak perlu menghantarnya semula.', backToMenu: 'Kembali ke menu', reviewOrder: 'Semak pesanan anda', confirmTable: 'Pesanan untuk meja',
     addTable: 'Tambah meja', editTable: 'Edit meja', tableLabel: 'Nama meja', tableCodeLabel: 'Kod meja', tableSort: 'Turutan paparan', tableActive: 'Aktif', tableInactive: 'Tidak aktif', activateTable: 'Aktifkan meja', deactivateTable: 'Nyahaktifkan meja', tableListHelp: 'Pilih meja untuk mengurus kod QR.', tableCodeHelp: 'Gunakan 01 atau A1. Kod mesti sepadan dengan pautan QR yang dicetak.', tableCodeFixed: 'Kod dikekalkan supaya QR yang dicetak terus berfungsi.', tableInactiveHelp: 'Pelanggan boleh melihat menu tetapi tidak boleh menghantar pesanan atau permintaan.', tableActiveHelp: 'Pelanggan boleh menghantar pesanan, lagu dan permintaan perkhidmatan.', downloadQr: 'Muat turun QR', noTables: 'Belum ada meja. Tambah meja pertama untuk mencipta kod QR.', deactivateTableHelp: 'Pesanan dan permintaan baharu akan disekat. Rekod sedia ada dikekalkan.', activateTableHelp: 'Pelanggan boleh menghantar pesanan dan permintaan melalui QR meja ini.', scanToOrder: 'Imbas untuk memesan',
     menu: 'Menu', songs: 'Lagu', member: 'Ahli', liveMusic: 'Muzik langsung setiap malam',
     guestTitle: 'Pesan terus dari meja anda', guestCopy: 'Lihat menu, minta lagu atau panggil staf.',
@@ -90,6 +92,7 @@ const copy = {
 }
 
 const zhCopy = {
+  viewOrder: '查看订单', itemSingle: '件', itemPlural: '件', searchDrinks: '搜索所有饮料', clearSearch: '清除搜索', noDrinksFound: '没有符合搜索的饮料。', removeItem: '移除', addOne: '增加一份', removeOne: '减少一份', addedToOrder: '已加入您的订单', orderSentTitle: '订单已发送给店员', orderSentHelp: '店员已收到您的订单，无需重复提交。', backToMenu: '返回菜单', reviewOrder: '确认您的订单', confirmTable: '当前点餐桌号',
   addTable: '添加桌号', editTable: '编辑桌号', tableLabel: '桌名', tableCodeLabel: '桌号代码', tableSort: '显示顺序', tableActive: '已启用', tableInactive: '已停用', activateTable: '启用桌号', deactivateTable: '停用桌号', tableListHelp: '选择桌号以管理二维码。', tableCodeHelp: '例如 01 或 A1。代码必须与已打印的二维码链接完全一致。', tableCodeFixed: '桌号代码保持不变，确保已打印的二维码继续有效。', tableInactiveHelp: '顾客可浏览菜单，但不能提交订单、点歌或服务请求。', tableActiveHelp: '顾客可提交订单、点歌及服务请求。', downloadQr: '下载二维码', noTables: '暂无桌号。添加第一个桌号以生成二维码。', deactivateTableHelp: '将暂停此桌号的新订单及请求，现有记录会保留。', activateTableHelp: '顾客可通过此桌二维码提交订单及请求。', scanToOrder: '扫码点餐',
   ordersSub: '将订单输入 POS 后标记完成。', orderNew: '新订单', orderCompleted: '已完成', orderCancelled: '已取消', markCompleted: '标记完成', posOrderHelp: '将订单输入 POS 后，请标记完成。', activeOrders: '笔待处理订单', completedBy: '完成人', staffMember: '店员',
   menu: '菜单', songs: '点歌', member: '会员', liveMusic: '每晚都有现场音乐',
@@ -414,12 +417,14 @@ function LanguageSwitch({ language, setLanguage, guest = false }) {
 function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff, notify }) {
   const t = getCopy(language)
   const setTab = onTabChange
-  const [items, setItems] = useState([])
   const [cart, setCart] = useState(() => { try { const saved = JSON.parse(sessionStorage.getItem(`dyrb-cart-${tableCode}`) || '[]'); return Array.isArray(saved) ? saved.filter(x => x.item?.id && Number.isInteger(x.qty) && x.qty > 0 && x.qty <= 20) : [] } catch { return [] } })
   useEffect(() => { try { sessionStorage.setItem(`dyrb-cart-${tableCode}`, JSON.stringify(cart)) } catch {} }, [cart, tableCode])
   const [addFeedback, setAddFeedback] = useState({})
   const addFeedbackTimers = useRef(new Map())
   const [cartOpen, setCartOpen] = useState(false)
+  const [orderReceipt, setOrderReceipt] = useState(null)
+  const orderSendLock = useRef(false)
+  const [drinkSearch, setDrinkSearch] = useState('')
   const [menu, setMenu] = useState([])
   const [beforeEight, setBeforeEight] = useState(isBeforeEightInMalaysia)
   const [menuGroup, setMenuGroup] = useState('food')
@@ -442,7 +447,7 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
     const poll = window.setInterval(loadMenu, 30000)
     return () => { clearInterval(poll); off(); if (channel) supabase.removeChannel(channel) }
   }, [loadMenu])
-  useModalFocus(cartOpen, () => setCartOpen(false), '.mobile-cart-sheet')
+  useModalFocus(cartOpen || Boolean(orderReceipt), () => { if (!sending) { setCartOpen(false); setOrderReceipt(null) } }, orderReceipt ? '.order-confirmation' : '.mobile-cart-sheet')
   useEffect(() => {
     const timer = window.setInterval(() => setBeforeEight(isBeforeEightInMalaysia()), 15000)
     return () => window.clearInterval(timer)
@@ -458,16 +463,19 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
     ? [{ id: 'mains', label: t.food }, { id: 'bites', label: t.bites }]
     : [{ id: 'draught', label: t.draught }, { id: 'bottle', label: t.bottle }, { id: 'cocktails', label: t.cocktails }, { id: 'mocktails', label: t.mocktails }, { id: 'soft', label: t.soft }, { id: 'spirits', label: t.spirits }]
   useEffect(() => { if (menu.length && !menu.some(item => item.category === category)) setCategory(menu.find(item => menuGroup === 'food' ? ['mains', 'bites'].includes(item.category) : !['mains', 'bites'].includes(item.category))?.category || 'mains') }, [menu, category, menuGroup])
-  function selectMenuGroup(group) { setMenuGroup(group); setCategory(group === 'food' ? 'mains' : 'draught') }
-  const filtered = menu.filter((x) => x.category === category && (category !== 'draught' || !draughtPeriod(x) || draughtPeriod(x) === (beforeEight ? 'happy-hour' : 'after-eight')))
+  function selectMenuGroup(group) { setMenuGroup(group); setDrinkSearch(''); setCategory(group === 'food' ? 'mains' : 'draught') }
+  const searchQuery = menuGroup === 'beverages' ? drinkSearch.trim().toLocaleLowerCase() : ''
+  const filtered = menu.filter(item => {
+    if (searchQuery ? ['mains', 'bites'].includes(item.category) : item.category !== category) return false
+    if (item.category === 'draught' && draughtPeriod(item) && draughtPeriod(item) !== (beforeEight ? 'happy-hour' : 'after-eight')) return false
+    return !searchQuery || [localizedMenuName(item, 'en'), localizedMenuName(item, language), item.bm, item.description, item.descriptionBm, localizedMenuServing(item, language)].filter(Boolean).join(' ').toLocaleLowerCase().includes(searchQuery)
+  })
   const menuCards = (() => {
-    if (!['draught', 'bottle', 'spirits'].includes(category)) return filtered.map((item) => ({ key: item.id, item, variants: [item] }))
     const groups = new Map()
-    filtered.forEach((item) => {
-      const key = `${item.category}|${localizedMenuName(item, 'en').toLowerCase()}|${draughtPeriod(item)}`
+    filtered.forEach(item => {
+      const key = ['draught', 'bottle', 'spirits'].includes(item.category) ? `${item.category}|${localizedMenuName(item, 'en').toLowerCase()}|${draughtPeriod(item)}` : item.id
       const group = groups.get(key) || { key, item, variants: [] }
-      group.variants.push(item)
-      groups.set(key, group)
+      group.variants.push(item); groups.set(key, group)
     })
     return [...groups.values()]
   })()
@@ -476,19 +484,17 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
   function addItem(item) {
     if (addFeedback[item.id] || sending || !item.available) return
     setCart((current) => { const found = current.find((x) => x.item.id === item.id); return found ? current.map((x) => x.item.id === item.id ? { ...x, qty: Math.min(20, x.qty + 1) } : x) : [...current, { item, qty: 1 }] })
-    setAddFeedback((current) => ({ ...current, [item.id]: 'loading' }))
+    setAddFeedback(current => ({ ...current, [item.id]: 'success' }))
+    notify(`${[localizedMenuName(item, language), localizedMenuServing(item, language)].filter(Boolean).join(' · ')} ${t.addedToOrder}`, 'success')
     const previousTimer = addFeedbackTimers.current.get(item.id)
     if (previousTimer) clearTimeout(previousTimer)
-    const loadingTimer = setTimeout(() => {
-      setAddFeedback((current) => ({ ...current, [item.id]: 'success' }))
-      const successTimer = setTimeout(() => {
-        setAddFeedback((current) => { const next = { ...current }; delete next[item.id]; return next })
-        addFeedbackTimers.current.delete(item.id)
-      }, 600)
-      addFeedbackTimers.current.set(item.id, successTimer)
-    }, 150)
-    addFeedbackTimers.current.set(item.id, loadingTimer)
+    const timer = setTimeout(() => {
+      setAddFeedback(current => { const next = { ...current }; delete next[item.id]; return next })
+      addFeedbackTimers.current.delete(item.id)
+    }, 450)
+    addFeedbackTimers.current.set(item.id, timer)
   }
+
   function changeQty(id, step) { if (sending) return; setCart((current) => current.map((x) => x.item.id === id ? { ...x, qty: Math.min(20, x.qty + step) } : x).filter((x) => x.qty > 0)) }
   function renderAddControl(item) {
     const quantity = cart.find((entry) => entry.item.id === item.id)?.qty || 0
@@ -497,18 +503,18 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
     const serving = localizedMenuServing(item, language)
     const fullName = [itemName, serving].filter(Boolean).join(' ')
     return item.available ? quantity > 0 && !feedback ? <div className="menu-qty-control" aria-label={`${fullName}, quantity ${quantity}`}>
-      <button aria-label={`Remove one ${fullName}`} onClick={() => changeQty(item.id, -1)}><Minus size={14} /></button>
+      <button aria-label={`${t.removeOne} ${fullName}`} disabled={sending} onClick={() => changeQty(item.id, -1)}><Minus size={14} /></button>
       <span aria-live="polite">{quantity}</span>
-      <button aria-label={`Add one ${fullName}`} onClick={() => changeQty(item.id, 1)}><Plus size={14} /></button>
-    </div> : <button className={`add-button ${feedback ? `is-${feedback}` : ''}`} onClick={() => addItem(item)} disabled={Boolean(feedback)} aria-label={feedback === 'loading' ? `Adding ${fullName}` : feedback === 'success' ? `${fullName} added` : `${t.add} ${fullName}`} aria-busy={feedback === 'loading'}>
+      <button aria-label={`${t.addOne} ${fullName}`} disabled={sending || quantity >= 20} onClick={() => changeQty(item.id, 1)}><Plus size={14} /></button>
+    </div> : <button className={`add-button ${feedback ? `is-${feedback}` : ''}`} onClick={() => addItem(item)} disabled={sending || Boolean(feedback)} aria-label={feedback === 'success' ? `${fullName} ${t.addedToOrder}` : `${t.add} ${fullName}`}>
       <span className="add-button-content"><Plus size={15} /><span>{t.add}</span></span>
-      {feedback === 'loading' && <span className="add-button-spinner" aria-hidden="true" />}
       {feedback === 'success' && <Check size={16} className="add-button-check" aria-hidden="true" />}
     </button> : <span className="sold-out-label">{t.unavailable}</span>
   }
   async function sendOrder() {
     if (!tableCode) { notify('Scan the QR code at your table before ordering.'); return }
-    if (!cart.length || sending) return
+    if (!cart.length || sending || orderSendLock.current) return
+    orderSendLock.current = true
     setSending(true)
     const currentCart = cartAtCurrentDraughtPrice(cart, menu, isBeforeEightInMalaysia())
     setCart(currentCart)
@@ -518,8 +524,10 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
       if (unavailable) throw new Error(`${unavailable.item.name} is no longer available. Remove it from your basket before sending.`)
       const checkedCart = currentCart.map(entry => ({ ...entry, item: latestMenu.find(item => item.id === entry.item.id) }))
       if (checkedCart.some((entry, index) => entry.item.price !== cart[index].item.price)) { setCart(checkedCart); notify('Prices have changed. Please review your basket and send again.'); return }
-      await submitOrder(tableCode, checkedCart); setCart([]); setCartOpen(false); notify(t.orderReceived) }
-    catch (error) { notify(error.message, 'error') } finally { setSending(false) }
+      const result = await submitOrder(tableCode, checkedCart)
+      setOrderReceipt({ id: result.id, table: tableCode, entries: checkedCart.map(entry => ({ item: { ...entry.item }, qty: entry.qty })), total: checkedCart.reduce((sum, entry) => sum + entry.item.price * entry.qty, 0) })
+      setCart([]); setCartOpen(false) }
+    catch (error) { notify(error.message, 'error') } finally { orderSendLock.current = false; setSending(false) }
   }
   async function sendSong(event) {
     event.preventDefault()
@@ -537,15 +545,20 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
     catch (error) { notify(error.message, 'error') } finally { setServiceBusy(false) }
   }
 
-  return <main className="guest-page">
+  function renderCartLine({ item, qty }) {
+    const name = localizedMenuName(item, language)
+    return <div className="cart-line" key={item.id}><div className="cart-line-copy"><strong>{name}</strong>{localizedMenuServing(item, language) && <span className="cart-serving">{localizedMenuServing(item, language)}</span>}<small>{formatMoney(item.price)}{item.category === 'draught' ? ` · ${localizedMenuPeriod(item, language)}` : ''}</small><button className="cart-remove" disabled={sending} onClick={() => changeQty(item.id, -qty)} aria-label={`${t.removeItem} ${name}`}>{t.removeItem}</button></div><div className="cart-line-controls"><strong>{formatMoney(item.price * qty)}</strong><div className="qty-control"><button aria-label={`${t.removeOne} ${name}`} disabled={sending} onClick={() => changeQty(item.id, -1)}><Minus size={14} /></button><span aria-live="polite">{qty}</span><button aria-label={`${t.addOne} ${name}`} disabled={sending || qty >= 20} onClick={() => changeQty(item.id, 1)}><Plus size={14} /></button></div></div></div>
+  }
+
+  return <main className={`guest-page customer-menu ${totalCount ? 'has-cart' : ''}`}>
     <header className="guest-topbar">
       <Brand />
-      <div className="guest-top-right"><div className="table-badge"><span className="live-dot" />{t.table} <strong>{tableCode}</strong></div><LanguageSwitch language={language} setLanguage={setLanguage} guest /><button className="staff-link" onClick={onStaff}><UserRound size={15} />{t.staff}</button></div>
+      <div className="guest-top-right"><div className="table-badge"><span className="live-dot" />{t.table} <strong>{tableCode || '—'}</strong></div><LanguageSwitch language={language} setLanguage={setLanguage} guest /></div>
     </header>
     {!tableCode && <div className="form-error" role="alert">Scan the QR code at your table before sending an order or request. Ask staff if you need help.</div>}
     <div className="guest-layout">
       <section className="guest-main-column">
-        <div className="guest-section-heading"><div>{tab !== 'member' && <><h2>{tab === 'menu' ? t.menuTitle : t.requestSong}</h2><p>{tab === 'menu' ? t.menuCopy : t.songCopy}</p></>}</div>
+        <div className={`guest-section-heading ${tab === 'menu' ? 'compact-menu-heading' : ''}`}><div className="guest-heading-copy">{tab !== 'member' && <><h2>{tab === 'menu' ? t.menuTitle : t.requestSong}</h2><p>{tab === 'menu' ? t.menuCopy : t.songCopy}</p></>}</div>
           <nav className="guest-tabs" aria-label="Guest services">
             <button className={tab === 'menu' ? 'active' : ''} onClick={() => setTab('menu')}><Utensils size={17} />{t.menu}</button>
             <button className={tab === 'songs' ? 'active' : ''} onClick={() => setTab('songs')}><Music2 size={17} />{t.songs}</button>
@@ -554,12 +567,13 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
         </div>
 
         {tab === 'menu' && <div className="menu-area">
-          <div className="menu-group-tabs" role="group" aria-label={language === 'zh' ? '菜单分类' : 'Menu type'}>
+          <div className="menu-navigation"><div className="menu-group-tabs" role="group" aria-label={language === 'zh' ? '菜单分类' : 'Menu type'}>
             <button className={menuGroup === 'food' ? 'active' : ''} aria-pressed={menuGroup === 'food'} onClick={() => selectMenuGroup('food')}><Utensils size={15} />{t.foodGroup}</button>
             <button className={menuGroup === 'beverages' ? 'active' : ''} aria-pressed={menuGroup === 'beverages'} onClick={() => selectMenuGroup('beverages')}><Beer size={15} />{t.beverageGroup}</button>
           </div>
-          {menu.some(item => item.eventId) && <div className="event-menu-banner"><strong>{menu.find(item => item.eventId)?.eventName || 'Special event'}</strong><span>{language === 'bm' ? 'Menu makanan khas' : language === 'zh' ? '特别活动餐单' : 'Special event food menu'}</span></div>}<div className="menu-category-row"><div className="category-tabs">{categories.filter(item => menu.some(row => row.category === item.id)).map((item) => <button key={item.id} className={category === item.id ? 'active' : ''} aria-pressed={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</button>)}</div></div>
-          <div className="menu-list">{menuLoading && !menu.length && <div className="loading-screen" role="status">{t.loading}</div>}{menuError && <div className="form-error" role="alert">{menuError}<button className="secondary-button" onClick={loadMenu}>Try again</button></div>}{!menuLoading && !menuError && !menuCards.length && <EmptyState icon={Utensils} title="No items in this category yet." />}{menuCards.map(({ item, variants }, index) => {
+          {menu.some(item => item.eventId) && <div className="event-menu-banner"><strong>{menu.find(item => item.eventId)?.eventName || 'Special event'}</strong><span>{language === 'bm' ? 'Menu makanan khas' : language === 'zh' ? '特别活动餐单' : 'Special event food menu'}</span></div>}<div className="menu-category-row"><div className="category-tabs">{categories.filter(item => menu.some(row => row.category === item.id)).map((item) => <button key={item.id} className={category === item.id ? 'active' : ''} aria-pressed={category === item.id} onClick={() => { setCategory(item.id); setDrinkSearch('') }}>{item.label}</button>)}</div></div>
+          {menuGroup === 'beverages' && <div className="beverage-search"><Search size={17} aria-hidden="true" /><input type="search" aria-label={t.searchDrinks} placeholder={t.searchDrinks} value={drinkSearch} maxLength={80} onChange={event => setDrinkSearch(event.target.value)} />{drinkSearch && <button aria-label={t.clearSearch} onClick={() => setDrinkSearch('')}><X size={16} /></button>}</div>}</div>
+          <div className="menu-list">{menuLoading && !menu.length && <div className="loading-screen" role="status">{t.loading}</div>}{menuError && <div className="form-error" role="alert">{menuError}<button className="secondary-button" onClick={loadMenu}>Try again</button></div>}{!menuLoading && !menuError && !menuCards.length && <EmptyState icon={Utensils} title={searchQuery ? t.noDrinksFound : (language === 'zh' ? '此分类暂无商品。' : language === 'bm' ? 'Tiada item dalam kategori ini.' : 'No items in this category yet.')} />}{menuCards.map(({ item, variants }, index) => {
             const itemName = localizedMenuName(item, language)
             const itemDescription = localizedMenuDescription(item, language)
             const itemPeriod = localizedMenuPeriod(item, language)
@@ -598,20 +612,24 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
       </section>
 
         <aside className="guest-rail">
-        <div className="cart-panel"><div className="panel-heading"><div><span className="section-eyebrow">{language === 'zh' ? t.table : 'TABLE'} {tableCode}</span><h3>{t.cart}</h3></div><span className="cart-count">{totalCount}</span></div>
-          {!cart.length ? <div className="empty-cart"><span className="empty-cart-icon"><ShoppingBag size={23} /></span><p>{t.emptyCart}</p><span>{t.noCharge}</span></div> : <div className="cart-lines">{cart.map(({ item, qty }) => <div className="cart-line" key={item.id}><div><strong>{localizedMenuName(item, language)}</strong>{localizedMenuServing(item, language) && <span className="cart-serving">{localizedMenuServing(item, language)}</span>}<small>{formatMoney(item.price)}{item.category === 'draught' ? ` · ${localizedMenuPeriod(item, language)}` : ''}</small></div><div className="qty-control"><button aria-label="Remove one" onClick={() => changeQty(item.id, -1)}><Minus size={13} /></button><span>{qty}</span><button aria-label="Add one" onClick={() => changeQty(item.id, 1)}><Plus size={13} /></button></div></div>)}</div>}
-          {cart.length > 0 && <><div className="cart-subtotal"><span>{t.subtotal}</span><strong>{formatMoney(total)}</strong></div><button className="primary-button full checkout-button" onClick={sendOrder} disabled={sending}>{sending ? t.loading : <>{t.payCounter}<ArrowRight size={16} /></>}</button></>}
+        <div className="cart-panel"><div className="panel-heading"><div><span className="section-eyebrow">{language === 'zh' ? t.table : 'TABLE'} {tableCode}</span><h3>{t.reviewOrder}</h3></div><span className="cart-count">{totalCount}</span></div>
+          {!cart.length ? <div className="empty-cart"><span className="empty-cart-icon"><ShoppingBag size={23} /></span><p>{t.emptyCart}</p><span>{t.noCharge}</span></div> : <div className="cart-lines">{cart.map(renderCartLine)}</div>}
+          {cart.length > 0 && <><div className="cart-subtotal"><span>{t.subtotal}</span><strong>{formatMoney(total)}</strong></div><button className="primary-button full checkout-button" onClick={sendOrder} disabled={sending}>{sending ? t.loading : <>{`${t.payCounter} · ${t.table} ${tableCode}`}<ArrowRight size={16} /></>}</button></>}
           {!cart.length && <button className="secondary-button full browse-button" onClick={() => { setTab('menu'); document.querySelector('.guest-section-heading')?.scrollIntoView({ behavior: 'smooth' }) }}>{language === 'zh' ? t.browseMenu : 'Browse the menu'}<ArrowRight size={15} /></button>}
         </div>
         <div className="service-panel"><div className="service-header"><span className="service-icon"><Bell size={17} /></span><div><span className="section-eyebrow">{language === 'zh' ? t.serviceKicker : 'AT YOUR SERVICE'}</span><h3>{t.help}</h3></div></div>
-          <div className="service-actions"><button disabled={serviceBusy} onClick={() => requestService('Call staff')}><span><UserRound size={16} />{t.callStaff}</span><ChevronRight size={15} /></button><button disabled={serviceBusy} onClick={() => requestService('Request water')}><span><GlassWater size={16} />{t.water}</span><ChevronRight size={15} /></button><button disabled={serviceBusy} onClick={() => requestService('Request the bill')}><span><Wallet size={16} />{t.bill}</span><ChevronRight size={15} /></button></div>
+          <div className="service-actions"><button disabled={serviceBusy} onClick={() => requestService('Request water')}><span><GlassWater size={16} />{t.water}</span><ChevronRight size={15} /></button><button disabled={serviceBusy} onClick={() => requestService('Request the bill')}><span><Wallet size={16} />{t.bill}</span><ChevronRight size={15} /></button></div>
           {serviceSent && <div className="service-confirm"><Check size={13} />{t.serviceReceived}</div>}
         </div>
         <div className="rail-footer"><span><Shield size={14} />{language === 'zh' ? t.footerPromise : 'Your table · your night'}</span><span>DYRB · MALAYSIA</span></div>
       </aside>
     </div>
-    <div className="mobile-cart-bar"><button onClick={() => setCartOpen(true)}><span className="mobile-cart-count">{totalCount}</span><ShoppingCart size={18} />{t.cart}<strong>{formatMoney(total)}</strong><ChevronUpSmall /></button></div>
-    {cartOpen && <div className="mobile-cart-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setCartOpen(false) }}><div className="mobile-cart-sheet" role="dialog" aria-modal="true" aria-label={t.cart}><button aria-label={t.close} className="sheet-close" onClick={() => setCartOpen(false)}><X size={18} /></button><div className="panel-heading"><div><span className="section-eyebrow">{language === 'zh' ? t.table : 'TABLE'} {tableCode}</span><h3>{t.cart}</h3></div><span className="cart-count">{totalCount}</span></div>{cart.length ? <><div className="cart-lines">{cart.map(({ item, qty }) => <div className="cart-line" key={item.id}><div><strong>{localizedMenuName(item, language)}</strong>{localizedMenuServing(item, language) && <span className="cart-serving">{localizedMenuServing(item, language)}</span>}<small>{formatMoney(item.price)}{item.category === 'draught' ? ` · ${localizedMenuPeriod(item, language)}` : ''}</small></div><div className="qty-control"><button aria-label={`Remove one ${item.name}`} disabled={sending} onClick={() => changeQty(item.id, -1)}><Minus size={13} /></button><span>{qty}</span><button aria-label={`Add one ${item.name}`} disabled={sending || qty >= 20} onClick={() => changeQty(item.id, 1)}><Plus size={13} /></button></div></div>)}</div><div className="cart-subtotal"><span>{t.subtotal}</span><strong>{formatMoney(total)}</strong></div><button className="primary-button full" disabled={sending} onClick={sendOrder}>{sending ? t.loading : t.payCounter}<ArrowRight size={16} /></button></> : <p className="empty-cart-copy">{t.emptyCart}</p>}</div></div>}
+    <footer className="guest-staff-footer"><button className="staff-link" onClick={onStaff}><UserRound size={15} />{t.staff}</button></footer>
+    {totalCount > 0 && !orderReceipt && <div className="mobile-cart-bar"><button onClick={() => setCartOpen(true)} aria-label={`${t.viewOrder}, ${totalCount} ${totalCount === 1 ? t.itemSingle : t.itemPlural}, ${formatMoney(total)}, ${t.table} ${tableCode}`}><span className="mobile-cart-summary"><strong>{totalCount} {totalCount === 1 ? t.itemSingle : t.itemPlural} · {formatMoney(total)}</strong><small>{t.table} {tableCode}</small></span><span className="mobile-cart-action">{t.viewOrder}<ChevronUpSmall /></span></button></div>}
+
+    {cartOpen && <div className="mobile-cart-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget && !sending) setCartOpen(false) }}><div className="mobile-cart-sheet" role="dialog" aria-modal="true" aria-label={t.cart}><button aria-label={t.close} className="sheet-close" disabled={sending} onClick={() => setCartOpen(false)}><X size={18} /></button><div className="panel-heading"><div><span className="section-eyebrow">{language === 'zh' ? t.table : 'TABLE'} {tableCode}</span><h3>{t.reviewOrder}</h3></div><span className="cart-count">{totalCount}</span></div>{cart.length ? <><div className="cart-lines">{cart.map(renderCartLine)}</div><div className="cart-subtotal"><span>{t.subtotal}</span><strong>{formatMoney(total)}</strong></div><button className="primary-button full" disabled={sending} onClick={sendOrder}>{sending ? t.loading : `${t.payCounter} · ${t.table} ${tableCode}`}<ArrowRight size={16} /></button></> : <p className="empty-cart-copy">{t.emptyCart}</p>}</div></div>}
+    {orderReceipt && <div className="order-confirmation-overlay"><section className="order-confirmation" role="dialog" aria-modal="true" aria-labelledby="order-confirmation-title" aria-describedby="order-confirmation-copy"><button className="receipt-close" aria-label={t.backToMenu} onClick={() => { setOrderReceipt(null); setTab('menu') }}><X size={18} /></button><span className="order-confirmation-icon"><CheckCircle2 size={36} /></span><div className="receipt-table">{t.table} <strong>{orderReceipt.table}</strong></div><h2 id="order-confirmation-title">{t.orderSentTitle}</h2><p id="order-confirmation-copy">{t.orderSentHelp}</p><div className="receipt-items">{orderReceipt.entries.map(({ item, qty }) => <div key={item.id}><strong>{qty} x</strong><span>{localizedMenuName(item, language)}{localizedMenuServing(item, language) ? ` · ${localizedMenuServing(item, language)}` : ''}</span></div>)}</div><div className="cart-subtotal"><span>{t.subtotal}</span><strong>{formatMoney(orderReceipt.total)}</strong></div><button className="primary-button full" onClick={() => { setOrderReceipt(null); setTab('menu') }}>{t.backToMenu}<ArrowRight size={16} /></button></section></div>}
+
   </main>
 }
 
