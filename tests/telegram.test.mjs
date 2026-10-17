@@ -347,7 +347,7 @@ test('an authorized completion edits the shared message, removes its button and 
   assert.deepEqual(tg.methods, ['editMessageText', 'answerCallbackQuery'])
   assert.equal(tg.messages[0].message_id, 77)
   assert.match(tg.messages[0].text, /^✓ Completed · Table 08/)
-  assert.match(tg.messages[0].text, /Completed by Aden/)
+  assert.match(tg.messages[0].text, /by Aden · 2:15pm/)
   assert.deepEqual(tg.messages[0].reply_markup.inline_keyboard, [])
   const first = db.tables.orders[0].completed_at
   await request(webhook(db, tg), orderCallback())
@@ -385,7 +385,7 @@ test('queued completion from website edits the original alert instead of sending
   await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
   assert.deepEqual(tg.methods, ['editMessageText'])
   assert.equal(tg.messages[0].message_id, 77)
-  assert.match(tg.messages[0].text, /Completed by Aden/)
+  assert.match(tg.messages[0].text, /by Aden · 2:15pm/)
   assert.equal(db.tables.telegram_outbox[1].status, 'sent')
 })
 
@@ -405,4 +405,9 @@ test('a retry of an already applied shared-message edit succeeds without duplica
   } }
   await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
   assert.equal(db.tables.telegram_outbox[1].status, 'sent')
+})
+
+
+test('completed order footer matches the concise staff-name and Malaysia-time format', () => {
+  assert.equal(bot.orderText({ table_code: 'A3', status: 'served', created_at: '2026-10-17T09:53:00Z', completed_at: '2026-10-17T09:54:00Z', completed_by_name: 'Elwin', order_items: [{ quantity: 1, item_name: 'Carlsberg Extra Cold · 10 mugs', unit_price: 150 }] }), '✓ Completed · Table A3\n17/10/2026, 5:53pm\n\n1 x Carlsberg Extra Cold · 10 mugs\n\nby Elwin · 5:54pm')
 })

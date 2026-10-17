@@ -49,12 +49,13 @@ export function orderButtons(deliveryId: string, order: any) {
 async function editOrderMessage(token: string, chatId: string, messageId: number, order: any, fetcher: any) {
   return telegramCall(token, 'editMessageText', { chat_id: chatId, message_id: messageId, text: orderText(order).slice(0, 3800), reply_markup: { inline_keyboard: [] }, link_preview_options: { is_disabled: true } }, fetcher)
 }
-export function malaysiaOrderTime(value: any) {
+export function malaysiaOrderTime(value: any, timeOnly = false) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'Date unavailable'
   const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', day: '2-digit', month: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(date)
   const part = (type: string) => parts.find(p => p.type === type)?.value || ''
-  return `${part('day')}/${part('month')}/${part('year')}, ${Number(part('hour'))}:${part('minute')}${part('dayPeriod').toLowerCase()}`
+  const time = `${Number(part('hour'))}:${part('minute')}${part('dayPeriod').toLowerCase()}`
+  return timeOnly ? time : `${part('day')}/${part('month')}/${part('year')}, ${time}`
 }
 function checked(result: any) { if (result.error) throw new Error('database_unavailable'); return result.data }
 export async function staffAccess(db: any, telegramUserId: string) {
@@ -67,7 +68,7 @@ export async function staffAccess(db: any, telegramUserId: string) {
 }
 export function orderText(order: any) {
   const items = order.order_items || []
-  return [`${orderCompleted(order) ? '✓ Completed' : 'New order'} · Table ${order.table_code}`, malaysiaOrderTime(order.created_at), '', ...items.map((i: any) => `${i.quantity} x ${i.item_name}`), ...(orderCompleted(order) ? ['', `Completed by ${order.completed_by_name || 'Staff'}${order.completed_at ? ` · ${malaysiaOrderTime(order.completed_at)}` : ''}`, 'Entered into POS.'] : [])].join('\n')
+  return [`${orderCompleted(order) ? '✓ Completed' : 'New order'} · Table ${order.table_code}`, malaysiaOrderTime(order.created_at), '', ...items.map((i: any) => `${i.quantity} x ${i.item_name}`), ...(orderCompleted(order) ? ['', `by ${order.completed_by_name || 'Staff'}${order.completed_at ? ` · ${malaysiaOrderTime(order.completed_at, true)}` : ''}`] : [])].join('\n')
 }
 export function songText(song: any) {
   return [`New song · Table ${song.table_code}`, '', `${song.title}${song.artist ? ` - ${song.artist}` : ''}`, ...(song.dedication ? ['', `Remark: ${song.dedication}`] : [])].join('\n')

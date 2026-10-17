@@ -11,7 +11,7 @@ New order · Table A3
 1 x Sausage
 ```
 
-The **✓ Mark as completed** button edits the original shared message to Completed, records who completed it and when, and removes the button. It requires an active linked staff account with `orders.manage`, and validates the exact registered chat/topic/message both in the handler and database. Each staff member must be individually linked in `telegram_staff`; group membership alone does not grant permission to complete orders. Other group members can see the shared completed status.
+The **✓ Mark as completed** button edits the original shared message to Completed, shows a final line such as `by Elwin · 5:54pm` in Malaysia time, and removes the button. The original order date/time stays at the top. It requires an active linked staff account with `orders.manage`, and validates the exact registered chat/topic/message both in the handler and database. Each staff member must be individually linked in `telegram_staff`; group membership alone does not grant permission to complete orders. Other group members can see the shared completed status.
 
 ## Deploy and test live
 
