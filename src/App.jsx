@@ -710,18 +710,36 @@ function Dashboard({ user, t, language, onLanguage, activeSection, setActiveSect
   const [search, setSearch] = useState('')
   const [loadError, setLoadError] = useState('')
   const actionLock = useRef(false)
+  const refreshFlight = useRef(null)
   const allowedNav = useMemo(() => {
     const keys = user.role === 'singer' ? ['songs'] : ['overview', 'songs', 'orders', 'service', 'members', 'menu', 'staff', 'tables', 'permissions']
     return keys.filter((key) => key === 'overview' || permissions.includes(navMeta[key].permission))
   }, [user.role, permissions])
-  const refresh = useCallback(async () => {
-    try { const next = await getOperations(user.role); setLoadError(''); setData(next); setPermissions(Array.isArray(next.permissions) ? next.permissions : await getPermissions(user.role)) }
-    catch (error) { setLoadError('Could not load the dashboard. Check your connection and try again.') }
-    finally { setLoading(false) }
+  const refresh = useCallback(() => {
+    if (refreshFlight.current) return refreshFlight.current
+    refreshFlight.current = (async () => {
+      try { const next = await getOperations(user.role); setLoadError(''); setData(next); setPermissions(Array.isArray(next.permissions) ? next.permissions : await getPermissions(user.role)) }
+      catch (error) { setLoadError('Could not load the dashboard. Check your connection and try again.') }
+      finally { setLoading(false) }
+    })().finally(() => { refreshFlight.current = null })
+    return refreshFlight.current
   }, [user.role, notify])
   useEffect(() => { refresh(); const off = listenForDemoChanges(refresh); let channel
     if (isLive) channel = supabase.channel(`operations-${user.id}`).on('postgres_changes', { event: '*', schema: 'public' }, refresh).subscribe()
-    return () => { off(); if (channel) supabase.removeChannel(channel) }
+    const refreshVisible = () => { if (document.visibilityState === 'visible') refresh() }
+    const poll = isLive ? window.setInterval(refreshVisible, 10000) : null
+    if (isLive) {
+      window.addEventListener('focus', refreshVisible)
+      window.addEventListener('online', refreshVisible)
+      document.addEventListener('visibilitychange', refreshVisible)
+    }
+    return () => {
+      off(); if (channel) supabase.removeChannel(channel)
+      if (poll !== null) window.clearInterval(poll)
+      window.removeEventListener('focus', refreshVisible)
+      window.removeEventListener('online', refreshVisible)
+      document.removeEventListener('visibilitychange', refreshVisible)
+    }
   }, [refresh, user.id])
   useEffect(() => { if (allowedNav.length && !allowedNav.includes(activeSection)) setActiveSection(allowedNav[0]) }, [allowedNav, activeSection, setActiveSection])
 

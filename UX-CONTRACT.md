@@ -31,6 +31,7 @@ Staff use individually assigned accounts. The dashboard shows only the sections 
 - Select/Listbox: native HTML selects own keyboard behavior and platform popup geometry.
 - Modal focus: `useModalFocus` owns Escape, keyboard containment, scroll locking, and focus restoration for basket, action, and member dialogs.
 - Notifications: the App notification system announces saved changes and failures. Dashboard loading failures include a retry action.
+- Dashboard freshness: Supabase Realtime triggers refreshes; a 10-second visible-page poll provides a fallback. Returning to the tab, regaining focus or reconnecting also refreshes. Concurrent reads share one in-flight request; timers/listeners are removed on unmount.
 - Scrollbars: the global baseline in `src/responsive-fixes.css` applies to all application scroll regions.
 - Staff navigation: all permitted sections remain reachable by horizontally scrolling the mobile navigation; sign-out remains in the header.
 - Prices: all MYR prices and totals show two decimal places. Order quantity is limited to 20 per item to match the server contract.
