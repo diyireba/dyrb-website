@@ -18,6 +18,7 @@ Make the guest menu feel like DYRB's night-time bar: charcoal surfaces, bright o
 - Use the logo's orange-red as the only strong accent. Reserve green for successful actions and status.
 - Use plain language and short labels. Never expose internal service or implementation names to guests.
 - Mobile staff navigation scrolls horizontally so every permitted section is reachable. Keep sign-out visible in the header and use readable action labels rather than shrinking the navigation to fit.
+- Mobile staff navigation reserves a 76px hosting-badge area below the bar, plus the device safe area. Content bottom padding includes both the navigation and badge space; navigation items keep an 88px minimum width and scroll horizontally.
 - Service requests stay visible beneath the guest menu on phones and tablets. The basket remains in its persistent bottom bar.
 - Global scrollbars, focus outlines, reduced motion, form errors, and modal geometry are owned by the shared baseline at the end of `src/responsive-fixes.css`.
 

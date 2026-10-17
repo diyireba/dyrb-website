@@ -499,8 +499,11 @@ button:disabled{cursor:not-allowed;opacity:.55}
 .row-actions{flex-wrap:wrap;gap:8px}
 .action-dialog{max-height:calc(100dvh - 40px);overflow-y:auto}
 @media(max-width:760px){
+ /* Keep the fixed hosting badge below, rather than on top of, staff navigation. */
+ .dashboard-layout{padding-bottom:calc(160px + env(safe-area-inset-bottom))}
+ .dashboard-sidebar{bottom:calc(76px + env(safe-area-inset-bottom));height:72px;padding:0 4px}
  .dashboard-nav{justify-content:flex-start;overflow-x:auto}
- .dashboard-nav button{flex:0 0 76px;font-size:11px;min-width:76px}
+ .dashboard-nav button{flex:0 0 88px;font-size:11px;min-width:88px;min-height:64px}
  .dashboard-topbar .breadcrumb{font-size:11px}
  .dashboard-content .page-heading-row p,.dashboard-content .menu-admin-copy strong{font-size:13px;line-height:1.5}
  .dashboard-content .menu-admin-copy small,.dashboard-content .menu-availability{font-size:11px}
