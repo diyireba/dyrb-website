@@ -23,8 +23,8 @@ test('every menu variant has a unique identifier', async () => {
   assert.notEqual(variants[0].id, variants[1].id)
   assert.deepEqual(variants.map(item => item.price).sort((a, b) => a - b), [15.8, 18.8])
 })
-test('demo staff phone normalization matches live sign-in', async () => {
-  assert.equal((await data.login('+60 123456789', '111111', 'staff')).role, 'owner')
+test('demo staff user ID matching ignores case and whitespace', async () => {
+  assert.equal((await data.login(' OWNER ', '111111', 'staff')).role, 'owner')
 })
 test('member accounts cannot enter staff sign-in', async () => {
   await assert.rejects(data.login('0128881001', '246810', 'staff'))
@@ -66,6 +66,7 @@ globalThis.__testClient = () => ({
 async function loadHandler(file) {
   const source = readFileSync(new URL(`../api/${file}.ts`, import.meta.url), 'utf8')
     .replace("import { createClient } from '@supabase/supabase-js'", 'const createClient = globalThis.__testClient')
+    .replace("'../server/login-identity.js'", JSON.stringify(new URL('../server/login-identity.js', import.meta.url).href))
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText
   return (await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`)).default
 }

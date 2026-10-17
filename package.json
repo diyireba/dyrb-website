@@ -7,6 +7,7 @@
     "test": "node --test tests/*.test.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:netlify": "npm run build && node tools/netlify-migrate.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

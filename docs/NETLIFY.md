@@ -19,7 +19,7 @@ Do not upload `.env.local` or any private key. Supabase data does not need to be
 1. In Netlify, choose **Add new project → Import an existing project** (some dashboards say Add new site).
 2. Choose **GitHub**, authorize access to the repository, and select `diyireba/dyrb-website`.
 3. Production branch: `main`. Leave the base directory blank/root.
-4. Build command: `npm run build`. Publish directory: `dist`. Functions directory: `netlify/functions`. The TOML file supplies these values and Node.js 22.
+4. Build command: `npm run build:netlify`. Publish directory: `dist`. Functions directory: `netlify/functions`. The TOML file supplies these values and Node.js 22.
 5. Before the first production build, add the environment variables below using Netlify's UI. If the import flow doesn't offer them, finish creating the project, open its environment settings, add them, and trigger a new production deploy before testing.
 
 | Name | Value | Scope if available |

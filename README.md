@@ -31,21 +31,21 @@ The demo menu now follows the supplied food and drinks pages. Carlsberg Smooth i
    If you already ran the earlier prototype schema, run [supabase/menu-catalog.sql](supabase/menu-catalog.sql) to replace its sample menu with the supplied catalog.
    For an already initialized project, also run [supabase/song-artist-optional.sql](supabase/song-artist-optional.sql) to allow guest song requests without an artist name.
    Apply [supabase/usability-hardening.sql](supabase/usability-hardening.sql) after the stored-items ledger migration to restore separate happy-hour and evening menu variants, enforce Malaysia pricing periods, reject missing request values, combine repeated open service calls, and prevent concurrent points deductions from creating a negative balance. New installations already include these checks in `schema.sql`.
-2. Enable the Phone auth provider and password sign-in. Do not expose public member sign-up; this app enrolls members in person through the server API. Phone confirmation can remain disabled because staff-confirmed enrollment creates confirmed phone users and sign-in uses phone + PIN without OTP.
-3. Create the first owner account in Supabase Auth with a phone number and a six-digit PIN/password. In SQL Editor, add that user to `staff_profiles` as `owner`:
+2. Enable **Email** password sign-in in Supabase, and disable public new-user signups. No Phone provider, SMS service or SMTP is needed. Existing installations must follow [docs/LOGIN.md](docs/LOGIN.md) and run `supabase/login-ids.sql` plus the account migration before deploying this version.
+3. For a fresh installation, create the first owner in Supabase Authentication → Users → Add user with email `staff.owner@login.dyrb.invalid`, a six-digit passcode, and auto-confirm enabled. Run `supabase/login-ids.sql`, then add the profile:
 
    ```sql
-   insert into public.staff_profiles(user_id, display_name, phone, role, active)
-   select id, 'Venue Owner', phone, 'owner', true
+   insert into public.staff_profiles(user_id, display_name, login_id, role, active)
+   select id, 'Venue Owner', 'owner', 'owner', true
    from auth.users
-   where phone = '+60XXXXXXXXX';
+   where email = 'staff.owner@login.dyrb.invalid';
    ```
 
-   Use the user's actual E.164 phone number in the `where` clause. Keep at least one active owner account.
-4. Copy `.env.example` to `.env.local` and fill the Supabase URL and publishable/anon key. For server actions, also configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in Vercel. The service-role key is server-only and must never use a `VITE_` prefix.
+   Sign in with user ID `owner` and the passcode you chose. Keep at least one active owner account.
+4. Copy `.env.example` to `.env.local` and fill the Supabase URL and publishable/anon key. For server actions, also configure `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in Netlify or Vercel. The service-role key is server-only and must never use a `VITE_` prefix.
 5. Use `vercel dev` to run the Vercel API routes locally with the environment variables. Vite's normal dev server is intended for the local demo mode.
 
-Member and staff phone numbers are normalized to Malaysia's `+60` format. PINs are stored and verified by Supabase Auth as passwords; the app never stores PINs in its live database. Member login is proxied through `/api/member-auth`, which rate-limits repeated failures by phone hash. Staff should enroll members in person and let the member choose the initial PIN with staff present.
+Member phone numbers are normalized to Malaysia's `+60` format; staff use unique user IDs. PINs/passcodes are stored and verified by Supabase Auth as passwords; the app never stores them in its live database. Both logins use `/api/member-auth`, which rate-limits repeated failures with separate staff/member identifiers. Internal email identities allow password verification without SMS or email delivery. Staff should enroll members in person and let the member choose the initial PIN with staff present.
 
 ## Roles
 

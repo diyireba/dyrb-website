@@ -278,32 +278,21 @@ function normalizePhone(phone) {
 
 export async function login(phone, pin, target = 'any') {
   if (!isLive) {
-    const user = readState().staff.find((u) => normalizePhone(u.phone) === normalizePhone(phone) && u.pin === pin && u.active)
+    const user = readState().staff.find((u) => (u.loginId || u.role).toLowerCase() === String(phone).trim().toLowerCase() && u.pin === pin && u.active)
     if (user && target === 'member') throw new Error('Use your staff sign-in page for this account.')
     if (user) return { ...user, type: 'staff' }
-    if (target === 'staff') throw new Error('Phone number or PIN is incorrect, or this staff account is inactive.')
+    if (target === 'staff') throw new Error('User ID or passcode is incorrect, or this staff account is inactive.')
     const member = readState().members.find((m) => normalizePhone(m.phone) === normalizePhone(phone) && m.active !== false && (m.pin || '246810') === pin)
     if (member) return { ...member, role: 'member', type: 'member' }
     throw new Error('Phone number or PIN is incorrect.')
   }
-  if (target === 'member') {
-    const response = await fetch('/api/member-auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: normalizePhone(phone), pin }) })
-    const result = await response.json()
-    if (!response.ok) throw new Error(result.error || 'Phone number or PIN is incorrect.')
-    const { error: sessionError } = await supabase.auth.setSession(result.session)
-    if (sessionError) throw sessionError
-    return { ...result.member, role: 'member', type: 'member' }
-  }
-  const { data, error } = await supabase.auth.signInWithPassword({ phone: normalizePhone(phone), password: pin })
-  if (error) throw error
-  const userId = data.user.id
-  const staffResult = await supabase.from('staff_profiles').select('user_id, display_name, role, active').eq('user_id', userId).maybeSingle()
-  if (staffResult.data?.active) return { id: userId, name: staffResult.data.display_name, role: staffResult.data.role, type: 'staff' }
-  if (target === 'staff') { await supabase.auth.signOut(); throw new Error('This phone number does not have an active staff account.') }
-  const memberResult = await supabase.from('members').select('id, display_name, phone, active').eq('id', userId).maybeSingle()
-  if (memberResult.data?.active) return { id: userId, name: memberResult.data.display_name, phone: memberResult.data.phone, role: 'member', type: 'member' }
-  await supabase.auth.signOut()
-  throw new Error('This account is not active.')
+  const isStaff = target !== 'member'
+  const response = await fetch('/api/member-auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(isStaff ? { accountType: 'staff', loginId: phone, pin } : { accountType: 'member', phone: normalizePhone(phone), pin }) })
+  const result = await response.json()
+  if (!response.ok) throw new Error(result.error || (isStaff ? 'User ID or passcode is incorrect.' : 'Phone number or PIN is incorrect.'))
+  const { error: sessionError } = await supabase.auth.setSession(result.session)
+  if (sessionError) throw sessionError
+  return isStaff ? { ...result.staff, type: 'staff' } : { ...result.member, role: 'member', type: 'member' }
 }
 
 export async function logout() { if (isLive) await supabase.auth.signOut() }
@@ -359,7 +348,7 @@ export async function getOperations(role) {
   if (permissions.includes('members.lookup')) requests.push(supabase.from('members').select('id, display_name, phone, active').order('created_at', { ascending: false }).limit(100).then(({ data, error }) => { if (error) throw error; result.members = (data || []).map((x) => ({ id: x.id, name: x.display_name, phone: x.phone, active: x.active })) }))
   if (permissions.includes('menu.view')) requests.push(supabase.from('menu_items').select('*').order('sort_order').then(({ data, error }) => { if (error) throw error; result.menu = (data || []).map((x) => ({ id: x.id, eventId: x.event_id, category: x.category, name: x.name_en, bm: x.name_bm, description: x.event_id && x.description_en === 'Halloween Night' ? '' : x.description_en, descriptionBm: x.description_bm, price: Number(x.price), available: x.available, image: menuPhoto(x), tag: x.tag || '' })) }))
   if (permissions.includes('tables.manage')) requests.push(supabase.from('venue_tables').select('*').order('sort_order').then(({ data, error }) => { if (error) throw error; result.tables = data || [] }))
-  if (permissions.includes('staff.manage')) requests.push(supabase.from('staff_profiles').select('user_id, display_name, phone, role, active').order('created_at').then(({ data, error }) => { if (error) throw error; result.staff = (data || []).map((x) => ({ id: x.user_id, name: x.display_name, role: x.role, phone: x.phone, active: x.active })) }))
+  if (permissions.includes('staff.manage')) requests.push(supabase.from('staff_profiles').select('user_id, display_name, phone, login_id, role, active').order('created_at').then(({ data, error }) => { if (error) throw error; result.staff = (data || []).map((x) => ({ id: x.user_id, name: x.display_name, role: x.role, phone: x.phone, loginId: x.login_id, active: x.active })) }))
   if (permissions.includes('permissions.manage')) requests.push(supabase.from('role_permissions').select('role, permission_key, enabled').then(({ data, error }) => { if (error) throw error; result.permissionRows = data || [] }))
   await Promise.all(requests)
   if (permissions.includes('members.adjust') && result.members.length) {
@@ -502,8 +491,10 @@ export async function adminAction(action, body) {
     }
     if (action === 'reset-member-pin') { const row = s.members.find((x) => x.id === body.id); if (!row) throw new Error('Member not found.'); row.pin = body.pin; return }
     if (action === 'add-staff') {
-      if (s.staff.some((x) => normalizePhone(x.phone) === normalizePhone(body.phone))) throw new Error('That staff phone number already exists.')
-      s.staff.push({ id: uid(), name: body.name, phone: body.phone, role: body.role || 'staff', active: true, pin: body.pin }); return
+      const loginId = String(body.loginId || '').trim().toLowerCase()
+      if (!/^[a-z][a-z0-9._-]{2,31}$/.test(loginId)) throw new Error('Enter a valid user ID.')
+      if (s.staff.some((x) => (x.loginId || x.role).toLowerCase() === loginId)) throw new Error('That staff user ID already exists.')
+      s.staff.push({ id: uid(), name: body.name, loginId, role: body.role || 'staff', active: true, pin: body.pin }); return
     }
     if (action === 'toggle-staff') { const row = s.staff.find((x) => x.id === body.id); if (row) row.active = body.active; return }
     if (action === 'set-staff-role') { const row = s.staff.find((x) => x.id === body.id); if (row) row.role = body.role; return }

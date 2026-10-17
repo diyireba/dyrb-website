@@ -6,6 +6,8 @@ Make the guest menu feel like DYRB's night-time bar: charcoal surfaces, bright o
 
 ## Interface rules
 
+- Staff credentials are labelled User ID and Passcode; member credentials remain phone and PIN. Reuse ValidatedForm, existing notifications and role-based account management. Neither login sends SMS.
+
 - Guest pages start with the table number and the next useful action.
 - Food and drinks remain separate, with short category labels and readable prices.
 - Menu items are compact, touch friendly rows. Keep add and quantity controls obvious.

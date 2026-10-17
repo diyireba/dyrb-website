@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { staffLoginId, validStaffLoginId, staffLoginEmail, memberLoginEmail } from '../server/login-identity.js'
 
 type VercelRequest = { method?: string; headers: Record<string, string | string[] | undefined>; body?: any }
 type VercelResponse = { status(code: number): VercelResponse; json(body: Record<string, unknown>): void }
@@ -53,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (action === 'enroll-member') {
       if (!canEnroll) return reply(res, 403, { error: 'Your role cannot enroll members.' })
       if (!name || name.length > 100 || !validPhone || !validPin) return reply(res, 400, { error: 'Enter a name, valid phone number, and 6-digit PIN.' })
-      const { data: created, error: createError } = await admin.auth.admin.createUser({ phone, password: pin, phone_confirm: true, user_metadata: { display_name: name, account_type: 'member' } })
+      const { data: created, error: createError } = await admin.auth.admin.createUser({ email: memberLoginEmail(phone), email_confirm: true, phone, password: pin, phone_confirm: true, user_metadata: { display_name: name, account_type: 'member' } })
       if (createError || !created.user) return reply(res, 400, { error: 'Could not create that member account. Check whether the phone number is already registered.' })
       const { error: rowError } = await admin.from('members').insert({ id: created.user.id, display_name: name, phone, active: true })
       if (rowError) { await admin.auth.admin.deleteUser(created.user.id); return reply(res, 400, { error: 'Could not save the member record.' }) }
@@ -75,16 +76,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (action === 'add-staff') {
       if (!canManageStaff) return reply(res, 403, { error: 'Your role cannot manage staff accounts.' })
-      if (!name || name.length > 100 || !validPhone || !validPin) return reply(res, 400, { error: 'Enter a name, valid phone number, and 6-digit PIN.' })
+      const loginId = staffLoginId(body.loginId)
+      if (!name || name.length > 100 || !validStaffLoginId(loginId) || !validPin) return reply(res, 400, { error: 'Enter a name, user ID (3–32 characters, starting with a letter), and 6-digit passcode.' })
       const requestedRole = String(body.role || 'staff')
       const role = actor.role === 'owner' ? requestedRole : 'staff'
       if (!allowedRoles.includes(role)) return reply(res, 400, { error: 'Choose a valid staff role.' })
-      const { data: created, error: createError } = await admin.auth.admin.createUser({ phone, password: pin, phone_confirm: true, user_metadata: { display_name: name, account_type: 'staff' } })
-      if (createError || !created.user) return reply(res, 400, { error: 'Could not create that staff account. Check whether the phone number is already registered.' })
-      const { error: rowError } = await admin.from('staff_profiles').insert({ user_id: created.user.id, display_name: name, phone, role, active: true })
+      const { data: created, error: createError } = await admin.auth.admin.createUser({ email: staffLoginEmail(loginId), email_confirm: true, password: pin, user_metadata: { display_name: name, account_type: 'staff' } })
+      if (createError || !created.user) return reply(res, 400, { error: 'Could not create that staff account. Check whether the user ID is already registered.' })
+      const { error: rowError } = await admin.from('staff_profiles').insert({ user_id: created.user.id, display_name: name, login_id: loginId, role, active: true })
       if (rowError) { await admin.auth.admin.deleteUser(created.user.id); return reply(res, 400, { error: 'Could not save the staff profile.' }) }
       await admin.from('audit_log').insert({ actor_id: actorId, action: 'staff.create', entity: 'staff_profiles', entity_id: created.user.id, details: { role } })
-      return reply(res, 201, { id: created.user.id, name, phone, role, active: true })
+      return reply(res, 201, { id: created.user.id, name, loginId, role, active: true })
     }
 
     if (action === 'toggle-staff') {

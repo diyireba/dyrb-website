@@ -14,6 +14,8 @@ DYRB is a Malaysian bar and bistro with table QR codes, a live singer, food and 
 
 ## Staff flow
 
+Staff use a unique assigned user ID and six-digit passcode; member phone/PIN credentials cannot enter the staff dashboard. `api/member-auth.ts` owns rate-limited credential verification for both flows, with separate internal identities and profile checks. `api/admin.ts` owns account creation. See `docs/LOGIN.md` for existing-account migration. No SMS or email verification is sent.
+
 Staff use individually assigned accounts. The dashboard shows only the sections their role can access. The singer works with song requests. Other service, order, menu, member, staff, table, and permission controls remain behind their corresponding permissions.
 
 ## Responsive behavior
