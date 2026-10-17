@@ -28,6 +28,7 @@ try {
     { command: 'start', description: 'Get your ID for staff linking' },
     { command: 'help', description: 'Show staff commands' },
     { command: 'whoami', description: 'Show your Telegram ID' },
+    { command: 'topicinfo', description: 'Show group/topic IDs for owner setup' },
     { command: 'songs', description: 'Show open song requests' },
     { command: 'orders', description: 'Show active orders' },
     { command: 'balance', description: 'Check member balance by phone (authorized staff)' },

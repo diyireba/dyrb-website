@@ -4,11 +4,13 @@ This integration is prepared locally. It becomes live only after the bot, databa
 
 ## What it does
 
+For the DYRB staff group with **Customer Order**, **Song**, and **Customer Balance Check** topics, follow `docs/TELEGRAM-TOPICS.md` and apply `supabase/telegram-topics.sql` after the base migration below. Order/song alerts can be routed to the approved group topics. Balance replies remain private to the authorized requester.
+
 - Sends new-song and new-order alerts to each linked staff member's **private** chat, only when their current role can view that data.
 - `/songs` and `/orders` show the latest 10 open requests/active orders.
 - `/balance 0123456789` shows points, unexpired stored drinks and any separately labelled legacy beer balance. Both `members.lookup` and `members.adjust` are required, matching website balance access. Balance lookup is audited. Staff without balance access cannot use it.
 - `/whoami` shows only the sender's Telegram ID, for owner-approved linking. Unlinked people cannot read venue data.
-- Commands are private-chat only. This version does not approve songs, change order statuses or adjust balances; those actions remain in the staff website.
+- Commands work privately, or in approved topics after the topic migration. This version does not approve songs, change order statuses or adjust balances; those actions remain in the staff website.
 
 ## 1. Create the bot
 

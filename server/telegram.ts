@@ -20,12 +20,12 @@ export function normalizeMemberPhone(value: string) {
   const phone = compact.startsWith('+') ? compact : compact.startsWith('60') ? `+${compact}` : compact.startsWith('0') ? `+60${compact.slice(1)}` : ''
   return /^\+[1-9]\d{7,14}$/.test(phone) ? phone : null
 }
-export async function sendTelegram(token: string, chatId: string, text: string, fetcher = fetch) {
+export async function sendTelegram(token: string, chatId: string, text: string, fetcher = fetch, threadId?: number) {
   let result: any
   try {
     const response = await fetcher(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: text.slice(0, 3800), link_preview_options: { is_disabled: true } }),
+      body: JSON.stringify({ chat_id: chatId, ...(threadId ? { message_thread_id: threadId } : {}), text: text.slice(0, 3800), link_preview_options: { is_disabled: true } }),
       signal: AbortSignal.timeout(6000),
     })
     result = await response.json()
@@ -86,7 +86,16 @@ export async function commandReply(db: any, userId: string, text: string) {
   return 'Unknown command. Use /help.'
 }
 
-export function createWebhookHandler({ db, token, secret, fetcher = fetch }: any) {
+async function approvedTopic(db: any, filters: { id?: string; chatId?: string; threadId?: number }) {
+  let query = db.from('telegram_topics').select('id,kind,chat_id,thread_id,approved_by,active').eq('active', true)
+  query = filters.id ? query.eq('id', filters.id) : query.eq('chat_id', filters.chatId).eq('thread_id', filters.threadId)
+  const topic = checked(await query.maybeSingle())
+  if (!topic) return null
+  const owner = checked(await db.from('staff_profiles').select('role,active').eq('user_id', topic.approved_by).maybeSingle())
+  return owner?.active && owner.role === 'owner' ? topic : null
+}
+
+export function createWebhookHandler({ db, token, secret, fetcher = fetch, botUsername = 'dyrb_bot' }: any) {
   return async (req: Request, res: Response) => {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed.' })
     if (!db || !token || !secret) return res.status(503).json({ error: 'Telegram is not configured.' })
@@ -95,8 +104,13 @@ export function createWebhookHandler({ db, token, secret, fetcher = fetch }: any
     try { update = parseBody(req.body) } catch { return res.status(400).json({ error: 'Invalid request.' }) }
     if (!Number.isSafeInteger(update.update_id) || update.update_id < 0) return res.status(400).json({ error: 'Invalid update.' })
     const message = update.message
-    // Member data and staff commands never go into groups, channels, or forwarded identities.
-    if (!message || message.chat?.type !== 'private' || !Number.isSafeInteger(message.from?.id) || message.from.id <= 0 || message.chat.id !== message.from.id || message.from.is_bot || typeof message.text !== 'string') return res.status(200).json({ ok: true })
+    if (!message || !Number.isSafeInteger(message.from?.id) || message.from.id <= 0 || message.from.is_bot || message.sender_chat || message.forward_origin || typeof message.text !== 'string') return res.status(200).json({ ok: true })
+    const isPrivate = message.chat?.type === 'private' && message.chat.id === message.from.id
+    const isTopic = message.chat?.type === 'supergroup' && Number.isSafeInteger(message.chat.id) && message.chat.id < 0 && message.is_topic_message === true && Number.isSafeInteger(message.message_thread_id) && message.message_thread_id > 0
+    if (!isPrivate && !isTopic) return res.status(200).json({ ok: true })
+    const rawCommand = message.text.trim().split(/\s+/)[0].toLowerCase()
+    const [command, addressedBot] = rawCommand.split('@')
+    if (isTopic && (!command.startsWith('/') || (addressedBot && addressedBot !== botUsername.toLowerCase()))) return res.status(200).json({ ok: true })
     const userId = String(message.from.id)
     let lease: string
     try {
@@ -108,8 +122,33 @@ export function createWebhookHandler({ db, token, secret, fetcher = fetch }: any
       if (recent.error) throw new Error('database_unavailable')
       // Quietly consume floods instead of generating additional Telegram replies.
       if (recent.count <= 15) {
-        const reply = await commandReply(db, userId, message.text.slice(0, 512))
-        await sendTelegram(token, userId, reply, fetcher)
+        if (isPrivate) {
+          const reply = await commandReply(db, userId, message.text.slice(0, 512))
+          await sendTelegram(token, userId, reply, fetcher)
+        } else if (command === '/topicinfo' || command === '/whoami') {
+          await sendTelegram(token, String(message.chat.id), `Your Telegram ID: ${userId}\nGroup ID: ${message.chat.id}\nTopic ID: ${message.message_thread_id}\nAsk the owner to register these IDs in Supabase. This command does not enable alerts.`, fetcher, message.message_thread_id)
+        } else if (['/orders', '/songs', '/balance', '/help'].includes(command)) {
+          const topic = await approvedTopic(db, { chatId: String(message.chat.id), threadId: message.message_thread_id })
+          if (topic && (command === '/help' || command === ({ order: '/orders', song: '/songs', balance: '/balance' }[topic.kind]))) {
+            const staff = await staffAccess(db, userId)
+            if (staff) {
+              if (topic.kind === 'balance') {
+                // Balance data always goes to the requesting person, never to the shared group.
+                try {
+                  const reply = await commandReply(db, userId, command === '/help' ? '/help' : message.text.slice(0, 512))
+                  await sendTelegram(token, userId, reply, fetcher)
+                  await sendTelegram(token, String(message.chat.id), 'Reply sent to your private chat with the bot.', fetcher, topic.thread_id)
+                } catch (error) {
+                  if (!(error instanceof TelegramError) || error.code !== 'telegram_403') throw error
+                  await sendTelegram(token, String(message.chat.id), 'Open the bot privately and press Start, then try again.', fetcher, topic.thread_id)
+                }
+              } else {
+                const reply = await commandReply(db, userId, command === '/help' ? '/help' : message.text.slice(0, 512))
+                await sendTelegram(token, String(message.chat.id), reply, fetcher, topic.thread_id)
+              }
+            }
+          }
+        }
       }
       checked(await db.from('telegram_updates').update({ status: 'done' }).eq('update_id', update.update_id).eq('lease_id', lease))
       return res.status(200).json({ ok: true })
@@ -131,13 +170,20 @@ export function createDispatchHandler({ db, token, secret, fetcher = fetch }: an
       for (const row of deliveries) {
         const finish = async (patch: any) => checked(await db.from('telegram_outbox').update({ ...patch, locked_until: null }).eq('id', row.id).eq('lease_id', row.lease_id))
         try {
-          const staff = await staffAccess(db, row.telegram_user_id)
           const permission = row.kind === 'order' ? 'orders.view' : 'songs.view'
-          if (!staff || !staff.can(permission) || !(row.kind === 'order' ? staff.notify_orders : staff.notify_songs)) { await finish({ status: 'skipped' }); continue }
+          let chatId = row.telegram_user_id, threadId: number | undefined
+          if (row.topic_id) {
+            const topic = await approvedTopic(db, { id: row.topic_id })
+            if (!topic || topic.kind !== row.kind) { await finish({ status: 'skipped' }); continue }
+            chatId = topic.chat_id; threadId = topic.thread_id
+          } else {
+            const staff = await staffAccess(db, row.telegram_user_id)
+            if (!staff || !staff.can(permission) || !(row.kind === 'order' ? staff.notify_orders : staff.notify_songs)) { await finish({ status: 'skipped' }); continue }
+          }
           const table = row.kind === 'order' ? 'orders' : 'song_requests'
           const entity = checked(await db.from(table).select(row.kind === 'order' ? '*,order_items(item_name,quantity,unit_price)' : '*').eq('id', row.entity_id).maybeSingle())
           if (!entity) { await finish({ status: 'skipped' }); continue }
-          await sendTelegram(token, row.telegram_user_id, row.kind === 'order' ? orderText(entity) : songText(entity), fetcher)
+          await sendTelegram(token, chatId, row.kind === 'order' ? orderText(entity) : songText(entity), fetcher, threadId)
           await finish({ status: 'sent', sent_at: new Date().toISOString(), last_error_code: null })
           sent++
         } catch (error) {

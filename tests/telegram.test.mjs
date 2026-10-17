@@ -21,7 +21,7 @@ function database({ role = 'manager', permissions = ['songs.view', 'orders.view'
     ],
     song_requests: [{ id: 'song-1', title: 'My Song', artist: 'Artist', dedication: '<b>hello</b> https://example.com', table_code: '08', status: 'pending' }],
     orders: [{ id: 'order-1', table_code: '08', status: 'new', order_items: [{ item_name: 'Chicken', quantity: 2, unit_price: '19.00' }] }],
-    audit_log: [], telegram_updates: [], telegram_outbox: [],
+    audit_log: [], telegram_updates: [], telegram_outbox: [], telegram_topics: [],
   }
   const calls = []
   const db = {
@@ -205,4 +205,96 @@ test('untrusted song text is sent as plain text with previews disabled', async (
 })
 test('network error messages never expose the Telegram token URL', async () => {
   await assert.rejects(bot.sendTelegram('super-secret', '42', 'hello', async () => { throw new Error('https://api.telegram.org/botsuper-secret/sendMessage') }), error => error.message === 'telegram_network')
+})
+
+function topic(db, kind = 'order', overrides = {}) {
+  db.tables.staff_profiles.push({ user_id: 'owner-1', role: 'owner', active: true })
+  const route = { id: 'topic-1', kind, chat_id: '-1001234567890', thread_id: 123, approved_by: 'owner-1', active: true, ...overrides }
+  db.tables.telegram_topics.push(route)
+  return route
+}
+function topicUpdate(text, extra = {}) {
+  return update(text, { chat: { id: -1001234567890, type: 'supergroup' }, is_topic_message: true, message_thread_id: 123, ...extra })
+}
+
+test('topic discovery returns actual group/thread IDs without granting access or querying venue data', async () => {
+  const db = database({ linked: false }), tg = telegram()
+  assert.equal((await request(webhook(db, tg), topicUpdate('/topicinfo@dyrb_bot'))).status, 200)
+  assert.equal(tg.messages[0].chat_id, '-1001234567890')
+  assert.equal(tg.messages[0].message_thread_id, 123)
+  assert.match(tg.messages[0].text, /Group ID: -1001234567890\nTopic ID: 123/)
+  assert.equal(db.tables.telegram_topics.length, 0)
+  assert.equal(db.calls.includes('staff_profiles'), false)
+  assert.equal(db.calls.includes('members'), false)
+})
+
+test('order/song topic notifications preserve their thread and fetch genuine committed submissions', async () => {
+  for (const kind of ['order', 'song']) {
+    const db = database(), tg = telegram(); topic(db, kind)
+    db.tables.telegram_outbox.push({ id: 'group-delivery', topic_id: 'topic-1', kind, entity_id: `${kind}-1`, attempts: 0, status: 'pending' })
+    assert.equal((await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })).body.sent, 1)
+    assert.equal(tg.messages[0].chat_id, '-1001234567890')
+    assert.equal(tg.messages[0].message_thread_id, 123)
+    assert.match(tg.messages[0].text, kind === 'order' ? /2 × Chicken/ : /My Song/)
+    assert.equal(db.tables.telegram_outbox[0].status, 'sent')
+  }
+})
+
+test('disabled, missing, mismatched or no-longer-owner-approved topics cannot receive queued data', async () => {
+  for (const scenario of ['disabled', 'missing', 'mismatch', 'inactive-owner', 'demoted-owner', 'db-error']) {
+    const db = database(), tg = telegram(); const route = topic(db)
+    if (scenario === 'disabled') route.active = false
+    if (scenario === 'missing') db.tables.telegram_topics.length = 0
+    if (scenario === 'mismatch') route.kind = 'song'
+    if (scenario === 'inactive-owner') db.tables.staff_profiles[1].active = false
+    if (scenario === 'demoted-owner') db.tables.staff_profiles[1].role = 'staff'
+    if (scenario === 'db-error') db.failTable = 'telegram_topics'
+    db.tables.telegram_outbox.push({ id: 'group-delivery', topic_id: 'topic-1', kind: 'order', entity_id: 'order-1', attempts: 0, status: 'pending' })
+    await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
+    assert.equal(tg.messages.length, 0, scenario)
+    assert.equal(db.calls.includes('orders'), false, scenario)
+  }
+})
+
+test('balance topic sends authorized results only to the requester privately and audits lookup', async () => {
+  const db = database(), tg = telegram(); topic(db, 'balance')
+  assert.equal((await request(webhook(db, tg), topicUpdate('/balance@dyrb_bot 0123456789'))).status, 200)
+  const privateMessage = tg.messages.find(message => message.chat_id === '42')
+  const groupMessage = tg.messages.find(message => message.chat_id === '-1001234567890')
+  assert.match(privateMessage.text, /Test Member\nPoints: 125/)
+  assert.equal(privateMessage.message_thread_id, undefined)
+  assert.doesNotMatch(groupMessage.text, /Test Member|125|0123456789|Whisky/)
+  assert.equal(groupMessage.message_thread_id, 123)
+  assert.equal(db.tables.audit_log.length, 1)
+})
+
+test('unapproved/wrong topics and unlinked or unauthorized staff never query balances', async () => {
+  for (const scenario of ['unapproved', 'wrong-topic', 'wrong-group', 'unlinked', 'staff', 'inactive']) {
+    const db = database(scenario === 'unlinked' ? { linked: false } : scenario === 'staff' ? { role: 'staff', permissions: ['members.lookup'] } : scenario === 'inactive' ? { active: false } : {}), tg = telegram()
+    if (scenario !== 'unapproved') topic(db, scenario === 'wrong-topic' ? 'order' : 'balance')
+    await request(webhook(db, tg), topicUpdate('/balance@dyrb_bot 0123456789', scenario === 'wrong-group' ? { chat: { id: -100999, type: 'supergroup' } } : {}))
+    assert.equal(db.calls.includes('members'), false, scenario)
+    for (const message of tg.messages) assert.doesNotMatch(message.text, /Test Member|Points: 125/)
+  }
+})
+
+test('anonymous, forwarded and other-bot topic commands are ignored before reading data', async () => {
+  for (const extra of [{ sender_chat: { id: -1001234567890 } }, { forward_origin: { type: 'user' } }, { from: { id: 42, is_bot: true } }]) {
+    const db = database(), tg = telegram()
+    await request(webhook(db, tg), topicUpdate('/topicinfo@dyrb_bot', extra))
+    assert.equal(db.calls.length, 0)
+    assert.equal(tg.messages.length, 0)
+  }
+  const db = database(), tg = telegram()
+  await request(webhook(db, tg), topicUpdate('/topicinfo@another_bot'))
+  assert.equal(db.calls.length, 0)
+})
+
+test('group topic delivery retries Telegram rate limits through the existing outbox', async () => {
+  const db = database(), tg = telegram(429, 120); topic(db)
+  db.tables.telegram_outbox.push({ id: 'group-delivery', topic_id: 'topic-1', kind: 'order', entity_id: 'order-1', attempts: 0, status: 'pending' })
+  await request(delivery(db, tg), {}, { 'x-telegram-dispatch-secret': 'dispatch-secret' })
+  assert.equal(db.tables.telegram_outbox[0].status, 'pending')
+  assert.equal(db.tables.telegram_outbox[0].last_error_code, 'telegram_429')
+  assert.equal(tg.messages[0].message_thread_id, 123)
 })
