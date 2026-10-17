@@ -33,6 +33,8 @@ Generate each secret locally, for example `node -e "console.log(require('node:cr
 
 ## 3. Connect Telegram's webhook
 
+For live Netlify setup without a local secrets file, set `SETUP_TELEGRAM_ON_DEPLOY=true` in Netlify environment variables, for Production with Builds access. The bot token, webhook secret and APP_URL also need Builds access. Push the updated `tools/netlify-migrate.mjs`; the existing `build:netlify` command runs registration after a successful build, only in Netlify production. Watch for `Connected @your_bot` and then wait for Published. Remove `SETUP_TELEGRAM_ON_DEPLOY` after success. Runtime bot secrets must also remain available to Functions. Complete the database migration before messaging the bot. This step registers the webhook and command menu; staff linking, submission webhook and retry Cron still need the steps below.
+
 With the same private values available locally, run:
 
 ```powershell

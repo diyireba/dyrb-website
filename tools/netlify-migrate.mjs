@@ -10,3 +10,12 @@ if (process.env.MIGRATE_LOGIN_ON_DEPLOY === 'true') {
 } else {
   console.log('Login migration is off. Set MIGRATE_LOGIN_ON_DEPLOY=true for the one-time production migration.')
 }
+
+if (!process.exitCode && process.env.SETUP_TELEGRAM_ON_DEPLOY === 'true') {
+  if (process.env.NETLIFY !== 'true' || process.env.CONTEXT !== 'production') {
+    console.error('Telegram setup is restricted to Netlify production builds. No webhook changed.')
+    process.exitCode = 1
+  } else {
+    await import('./setup-telegram.mjs')
+  }
+}
