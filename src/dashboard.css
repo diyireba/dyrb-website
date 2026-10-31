@@ -1,0 +1,167 @@
+/* Staff workspace. Loaded after the legacy guest/staff styles; never targets guest pages. */
+.dashboard-layout {
+  --staff-canvas: #f5f6f8;
+  --staff-surface: #fff;
+  --staff-ink: #202329;
+  --staff-muted: #626b77;
+  --staff-border: #e3e6eb;
+  --staff-accent: #e64d2e;
+  --staff-font: 'DM Sans', 'Noto Sans SC', system-ui, sans-serif;
+  grid-template-columns: 224px minmax(0, 1fr);
+  background: var(--staff-canvas);
+  color: var(--staff-ink);
+  font-family: var(--staff-font);
+  font-size: 14px;
+}
+.dashboard-layout button, .dashboard-layout input, .dashboard-layout select, .dashboard-layout textarea { font-family: inherit; }
+.dashboard-layout .dashboard-main { min-width: 0; background: var(--staff-canvas); color: var(--staff-ink); }
+.dashboard-layout .dashboard-sidebar { padding: 28px 16px 18px; background: #202329; border-right: 1px solid #2d3138; }
+.dashboard-layout .sidebar-brand { padding: 0 8px 28px; }
+.dashboard-layout .sidebar-brand .brand-mark { width: 38px; height: 38px; }
+.dashboard-layout .sidebar-brand .brand-lockup strong { font-size: 18px; letter-spacing: .08em; }
+.dashboard-layout .sidebar-brand .brand-lockup small { font-size: 11px; color: #a6adb8; }
+.dashboard-layout .sidebar-section-label { margin: 12px 12px; font-size: 11px; font-weight: 500; letter-spacing: .02em; text-transform: none; color: #a6adb8; }
+.dashboard-layout .dashboard-nav { gap: 4px; }
+.dashboard-layout .dashboard-nav button { min-height: 44px; padding: 0 12px; border-radius: 6px; color: #c5cad2; font-size: 13px; font-weight: 500; gap: 10px; }
+.dashboard-layout .dashboard-nav button:hover { background: #2c3037; color: #fff; }
+.dashboard-layout .dashboard-nav button > svg { color: inherit; }
+.dashboard-layout .dashboard-nav button.active { background: #30343c; color: #fff; }
+.dashboard-layout .dashboard-nav button.active > svg { color: inherit; }
+.dashboard-layout .dashboard-nav button.active::after { left: -16px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 2px 2px 0; background: var(--staff-accent); }
+.dashboard-layout .dashboard-nav button em { min-width: 21px; padding: 2px 6px; border-radius: 5px; background: #454b55; color: #fff; font-size: 11px; font-style: normal; }
+.dashboard-layout .sidebar-profile { border-color: #383d46; gap: 10px; padding-top: 18px; }
+.dashboard-layout .profile-avatar { width: 32px; height: 32px; border: 0; border-radius: 50%; background: #3c424c; color: #fff; font: 500 12px var(--staff-font); }
+.dashboard-layout .sidebar-profile strong { font-size: 13px; font-weight: 500; }
+.dashboard-layout .sidebar-profile small { margin-top: 3px; font-size: 11px; color: #a6adb8; }
+.dashboard-layout .sidebar-profile > button { min-width: 36px; min-height: 36px; color: #c5cad2; }
+.dashboard-layout .sidebar-mode { font-size: 10px; color: #a6adb8; }
+.dashboard-layout .mode-led { background: #9aa3b1; box-shadow: none; }
+.dashboard-layout .mode-led.live { background: #66a888; }
+.dashboard-layout .dashboard-topbar { height: 60px; padding: 0 36px; background: var(--staff-surface); border-bottom: 1px solid var(--staff-border); }
+.dashboard-layout .breadcrumb { font-size: 12px; color: var(--staff-muted); }
+.dashboard-layout .breadcrumb strong { color: var(--staff-ink); font-weight: 500; }
+.dashboard-layout .topbar-avatar { width: 30px; height: 30px; border-radius: 50%; background: #eef0f3; color: #4c5562; font-size: 11px; }
+.dashboard-layout .topbar-signout { width: 34px; height: 34px; border-color: var(--staff-border); border-radius: 6px; color: var(--staff-muted); }
+.dashboard-layout .topbar-signout:hover { background: var(--staff-canvas); }
+.dashboard-layout .language-switch { border-color: var(--staff-border); background: transparent; color: var(--staff-muted); }
+.dashboard-layout .language-switch button { color: var(--staff-muted); font-size: 11px; }
+.dashboard-layout .language-switch button.active { color: var(--staff-ink); }
+.dashboard-layout .dashboard-content { max-width: 1600px; margin: 0 auto; padding: 32px 36px 48px; }
+.dashboard-layout .page-stack { gap: 24px; }
+.dashboard-layout .page-heading-row { align-items: center; gap: 16px; min-height: 42px; }
+.dashboard-layout .page-heading-row h1 { margin: 0; font: 650 28px/1.25 var(--staff-font); letter-spacing: -.035em; color: var(--staff-ink); }
+.dashboard-layout .page-heading-row p { margin-top: 8px; font-size: 13px; color: var(--staff-muted); }
+.dashboard-layout .page-heading-row .section-eyebrow { display: none; }
+.dashboard-layout .section-eyebrow { color: var(--staff-muted); letter-spacing: .03em; }
+.dashboard-layout .surface-card, .dashboard-layout .summary-card, .dashboard-layout .order-card, .dashboard-layout .qr-preview-card, .dashboard-layout .permission-matrix { border-color: var(--staff-border); border-radius: 8px; background: var(--staff-surface); color: var(--staff-ink); box-shadow: none; }
+.dashboard-layout .primary-button { min-height: 40px; padding: 0 16px; border-radius: 6px; border: 1px solid var(--staff-accent); background: var(--staff-accent); color: #fff; font-size: 13px; font-weight: 600; box-shadow: none; }
+.dashboard-layout .primary-button:hover { background: #ce3e22; border-color: #ce3e22; }
+.dashboard-layout .secondary-button { min-height: 36px; border-color: #d6dbe2; border-radius: 6px; background: #fff; color: #414a57; font-size: 12px; }
+.dashboard-layout .secondary-button:hover { background: #f5f6f8; border-color: #b5bdc8; }
+.dashboard-layout .summary-card { min-height: 144px; padding: 20px; }
+.dashboard-layout .summary-card:hover { transform: none; border-color: #b5bdc8; background: #fff; }
+.dashboard-layout .summary-icon { background: #f0f2f5; color: #596373; border-radius: 6px; }
+.dashboard-layout .summary-card > strong { color: var(--staff-ink); font: 600 30px/1.2 var(--staff-font); font-variant-numeric: tabular-nums; }
+.dashboard-layout .summary-label { color: #414a57; font-size: 13px; }
+.dashboard-layout .summary-card small { color: var(--staff-muted); font-size: 12px; }
+.dashboard-layout .overview-quick-links h2 { font: 600 16px var(--staff-font); color: var(--staff-ink); }
+.dashboard-layout .overview-quick-links button { min-height: 48px; font-size: 13px; border-color: var(--staff-border); color: #414a57; }
+.dashboard-layout .overview-empty-note, .dashboard-layout .mini-song-copy strong { font-size: 13px; }
+.dashboard-layout .mini-song-copy small, .dashboard-layout .mini-song-table { font-size: 12px; color: var(--staff-muted); }
+.dashboard-layout .menu-admin-head p, .dashboard-layout .menu-admin-head > span { font-size: 12px; color: var(--staff-muted); }
+.dashboard-layout .menu-admin-row { min-height: 72px; gap: 14px; border-color: var(--staff-border); }
+.dashboard-layout .menu-admin-thumb { width: 44px; height: 44px; border-radius: 5px; }
+.dashboard-layout .menu-admin-copy strong { color: var(--staff-ink); font-size: 13px; line-height: 1.5; }
+.dashboard-layout .menu-admin-copy small { color: var(--staff-muted); font-size: 12px; line-height: 1.5; }
+.dashboard-layout .menu-availability { font-size: 12px; color: var(--staff-muted); }
+.dashboard-layout .menu-availability.on { color: #357456; }
+.dashboard-layout .toggle-switch { background: #d3d8df; border-color: #d3d8df; }
+.dashboard-layout .toggle-switch.on { background: #357456; border-color: #357456; }
+.dashboard-layout .toggle-switch > span { background: #fff; }
+.dashboard-layout label { font-size: 12px; }
+.dashboard-layout .surface-card table th { height: 44px; background: #fafbfc; color: var(--staff-muted); border-bottom: 1px solid var(--staff-border); letter-spacing: 0; text-transform: none; font-size: 12px; font-weight: 500; }
+.dashboard-layout .surface-card table td { border-color: var(--staff-border); color: #414a57; font-size: 13px; }
+.dashboard-layout .card-title-row h2, .dashboard-layout .table-card-heading h2, .dashboard-layout .menu-admin-head h2 { color: var(--staff-ink); font-size: 16px; font-weight: 600; letter-spacing: -.015em; }
+.dashboard-layout .dashboard-footnote { color: var(--staff-muted); font-size: 11px; }
+/* Song queue: titles lead, status and decisions have distinct columns. */
+.dashboard-layout .songs-page .queue-table-card { overflow: hidden; }
+.dashboard-layout .songs-page .simple-song-heading { padding: 20px 24px; border-bottom: 1px solid var(--staff-border); }
+.dashboard-layout .songs-page .simple-song-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 16px; }
+.dashboard-layout .songs-page .count-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; margin: 0; padding: 0 7px; border: 0; border-radius: 5px; background: #eef0f3; color: #555f6d; font-size: 12px; font-weight: 500; }
+.dashboard-layout .songs-page table { width: 100%; min-width: 0; table-layout: fixed; }
+.dashboard-layout .songs-page td { white-space: normal; }
+.dashboard-layout .songs-page th, .dashboard-layout .songs-page td { padding: 18px 24px; text-align: left; }
+.dashboard-layout .songs-page th { height: 44px; padding-top: 12px; padding-bottom: 12px; border-top-color: var(--staff-border); }
+.dashboard-layout .songs-page th:nth-child(1) { width: 29%; }
+.dashboard-layout .songs-page th:nth-child(2) { width: 12%; }
+.dashboard-layout .songs-page th:nth-child(3) { width: 16%; }
+.dashboard-layout .songs-page th:nth-child(4) { width: 13%; }
+.dashboard-layout .songs-page th:nth-child(5) { width: 30%; }
+.dashboard-layout .songs-page tbody tr { height: 78px; }
+.dashboard-layout .songs-page tbody tr:last-child td { border-bottom: 0; }
+.dashboard-layout .songs-page tbody tr:hover { background: #fafbfc; }
+.dashboard-layout .songs-page .song-cell { gap: 0; min-width: 0; }
+.dashboard-layout .songs-page .song-cell > span { min-width: 0; }
+.dashboard-layout .songs-page .song-cell strong, .dashboard-layout .songs-page .mobile-song-title strong { display: block; font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--staff-ink); white-space: normal; overflow-wrap: anywhere; }
+.dashboard-layout .songs-page .song-cell small, .dashboard-layout .songs-page .mobile-song-title small { display: block; margin-top: 4px; font-size: 12px; line-height: 1.4; color: var(--staff-muted); white-space: normal; }
+.dashboard-layout .songs-page .table-chip { display: inline-block; padding: 5px 8px; border: 0; border-radius: 4px; background: #f0f2f5; color: #4b5563; font-size: 12px; white-space: nowrap; }
+.dashboard-layout .songs-page .dedication-cell { color: var(--staff-muted); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.dashboard-layout .songs-page .song-status { display: inline-flex; align-items: center; gap: 7px; padding: 0; background: transparent; border: 0; border-radius: 0; color: #596373; font-size: 12px; font-weight: 400; white-space: nowrap; }
+.dashboard-layout .songs-page .song-status::before { content: ''; width: 6px; height: 6px; flex: none; border-radius: 50%; background: #9ca3af; }
+.dashboard-layout .songs-page .song-status.pending::before { background: #c38a24; }
+.dashboard-layout .songs-page .song-status.approved::before { background: #3c8764; }
+.dashboard-layout .songs-page .song-status.singing::before { background: #4d7eaa; }
+.dashboard-layout .songs-page .row-actions { flex-wrap: nowrap; justify-content: flex-start; gap: 8px; margin: 0; }
+.dashboard-layout .songs-page .song-decision { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #596373; font: 500 12px/1.2 var(--staff-font); white-space: nowrap; cursor: pointer; }
+.dashboard-layout .songs-page .approve-action { background: #fff; border-color: #cdd3dc; color: #303946; }
+.dashboard-layout .songs-page .approve-action:hover { background: #f0f2f5; border-color: #a8b2c0; }
+.dashboard-layout .songs-page .reject-action:hover, .dashboard-layout .songs-page .song-remove-action:hover { color: #ac3f31; background: #fdf1ef; }
+.dashboard-layout .songs-page .song-remove-action { width: auto; height: auto; margin: 0; opacity: 1; }
+.dashboard-layout .songs-page .song-decision:disabled { cursor: not-allowed; opacity: .5; }
+.dashboard-layout .songs-page .song-view-only { color: var(--staff-muted); }
+.dashboard-layout .songs-page .add-song-form { padding: 20px; background: #fff; border: 1px solid var(--staff-border); border-radius: 8px; }
+.dashboard-layout .songs-page .add-song-form label { color: #414a57; font-size: 12px; }
+.dashboard-layout .songs-page .add-song-form input { min-height: 40px; border: 1px solid #d6dbe2; border-radius: 5px; background: #fff; color: var(--staff-ink); font-size: 13px; }
+@media (min-width: 761px) and (max-width: 1180px) {
+  .dashboard-layout { grid-template-columns: 200px minmax(0, 1fr); }
+  .dashboard-layout .dashboard-content { padding: 24px; }
+  .dashboard-layout .songs-page th, .dashboard-layout .songs-page td { padding-left: 14px; padding-right: 14px; }
+  .dashboard-layout .songs-page th:nth-child(1) { width: 25%; }
+  .dashboard-layout .songs-page th:nth-child(3) { width: 12%; }
+  .dashboard-layout .songs-page th:nth-child(5) { width: 38%; }
+  .dashboard-layout .songs-page .row-actions { flex-wrap: wrap; gap: 4px; }
+}
+@media (max-width: 760px) {
+  .dashboard-layout { display: block; }
+  .dashboard-layout .dashboard-sidebar { padding: 0 4px; border-top: 1px solid var(--staff-border); border-right: 0; background: #fff; }
+  .dashboard-layout .dashboard-nav { gap: 0; }
+  .dashboard-layout .dashboard-nav button { flex: 0 0 88px; min-width: 88px; min-height: 64px; padding: 4px 2px; gap: 5px; font-size: 11px; color: var(--staff-muted); }
+  .dashboard-layout .dashboard-nav button.active { background: #f6f7f9; color: var(--staff-ink); }
+  .dashboard-layout .dashboard-nav button.active::after { top: 0; left: 24px; right: 24px; bottom: auto; width: auto; height: 2px; }
+  .dashboard-layout .dashboard-nav button em { min-width: 16px; padding: 1px 4px; font-size: 9px; }
+  .dashboard-layout .dashboard-topbar { height: 56px; padding: 0 16px; }
+  .dashboard-layout .dashboard-content { padding: 24px 16px 32px; }
+  .dashboard-layout .page-heading-row h1 { font-size: 24px; }
+  .dashboard-layout .page-heading-row > .primary-button { min-height: 40px; padding: 0 12px; font-size: 12px; }
+  .dashboard-layout .page-stack { gap: 20px; }
+  .dashboard-layout .songs-page .simple-song-heading { padding: 18px 16px; align-items: flex-start; }
+  .dashboard-layout .songs-page .mobile-song-list { gap: 0; padding: 0; }
+  .dashboard-layout .songs-page .mobile-song-card { padding: 18px 16px; border: 0; border-bottom: 1px solid var(--staff-border); border-radius: 0; background: #fff; }
+  .dashboard-layout .songs-page .mobile-song-card:last-child { border-bottom: 0; }
+  .dashboard-layout .songs-page .mobile-song-top { align-items: flex-start; gap: 12px; }
+  .dashboard-layout .songs-page .mobile-song-top .song-status { flex: none; padding-top: 3px; }
+  .dashboard-layout .songs-page .mobile-song-meta { margin: 8px 0 0; padding: 0; border: 0; }
+  .dashboard-layout .songs-page .song-table-label { color: var(--staff-muted); font-size: 12px; font-weight: 400; }
+  .dashboard-layout .songs-page .song-dedication { padding: 8px 0; margin: 8px 0 0; border: 0; border-radius: 0; background: transparent; color: var(--staff-muted); }
+  .dashboard-layout .songs-page .row-actions { margin-top: 14px; gap: 8px; flex-wrap: wrap; }
+  .dashboard-layout .songs-page .song-decision { flex: none; min-height: 42px; padding: 0 12px; font-size: 12px; }
+  .dashboard-layout .songs-page .song-remove-action { margin-left: auto; }
+  .dashboard-layout .songs-page .approve-action { min-width: 104px; }
+  .dashboard-layout .summary-card { min-height: 136px; padding: 16px; }
+  .dashboard-layout .menu-admin-row { gap: 10px; }
+}
+@media (max-width: 359px) {
+  .dashboard-layout .page-heading-row { flex-wrap: wrap; }
+  .dashboard-layout .songs-page .song-decision { padding: 0 8px; }
+  .dashboard-layout .songs-page .approve-action { min-width: 92px; }
+}

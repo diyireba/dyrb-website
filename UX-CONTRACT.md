@@ -63,3 +63,7 @@ Source: user request, 17 October 2026; `supabase/event-menu.sql` owns permission
 Event names are editable in the existing event-settings form (user request, 17 October 2026). Save validates a trimmed 1–80 character name, preserves the catalog and schedule, and supplies the saved name to staff labels and the guest banner. `supabase/event-menu-name.sql` adds database validation and a public RPC that reveals only the active event name.
 
 Service requests are retired: no customer water/bill/help panel, staff Service navigation, overview card, or service permission controls. The submission endpoint rejects requests from older clients once disable-service-requests.sql is applied.
+
+## Song queue presentation
+
+SongStatus renders the same status in a dedicated desktop column and beside the mobile title. SongActions remains the shared owner of Approve → Start song → Mark sung, Reject and confirmed Remove. Row action groups are named by the song title; view-only staff see the status with no management controls. The count represents all visible pending/approved/singing requests. Dashboard styling is scoped in src/dashboard.css and keeps the existing modal, notification, navigation and loading owners. The sidebar active section exposes aria-current; Add a song exposes its expanded state.

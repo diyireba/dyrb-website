@@ -4,6 +4,7 @@ import App from './App.jsx'
 import './styles.css'
 import './modern.css'
 import './responsive-fixes.css'
+import './dashboard.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

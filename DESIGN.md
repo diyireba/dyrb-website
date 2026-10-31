@@ -28,6 +28,10 @@ Make the guest menu feel like DYRB's night-time bar: charcoal surfaces, bright o
 
 ## Tokens
 
-The staff workspace tokens live in `src/modern.css`: warm canvas `#f6f4ef`, white surfaces, charcoal text, and DYRB orange-red `#e64d2e`. The guest menu overrides those tokens in `src/responsive-fixes.css` with charcoal `#171717`, raised charcoal surfaces, white text, and orange-red `#f04e32` to match the approved mobile concept. Existing component styles are local to `src/App.jsx`, `src/styles.css`, `src/modern.css`, and `src/responsive-fixes.css`.
+The staff workspace tokens live in `src/dashboard.css`, loaded after the legacy styles: cool canvas `#f5f6f8`, white surfaces, ink `#202329`, muted text `#626b77`, border `#e3e6eb`, and DYRB orange-red `#e64d2e`. The sidebar is charcoal `#202329`; staff typography uses DM Sans with Noto Sans SC and system fallbacks. Shared staff controls and table styles derive from these scoped CSS variables. The guest menu overrides those tokens in `src/responsive-fixes.css` with charcoal `#171717`, raised charcoal surfaces, white text, and orange-red `#f04e32` to match the approved mobile concept. Existing component styles are local to `src/App.jsx`, `src/styles.css`, `src/modern.css`, and `src/responsive-fixes.css`.
 
 Service requests are retired: no customer water/bill/help panel, staff Service navigation, overview card, or service permission controls. The submission endpoint rejects requests from older clients once disable-service-requests.sql is applied.
+
+## Staff dashboard refinement
+
+The staff dashboard is a restrained operational workspace: 224px desktop navigation, a 60px utility bar, 28px page titles, 8px surface corners and subtle borders without shadows. Keep DYRB branding; avoid duplicated venue cards, decorative row icons, gold treatments and competing filled actions. Song titles are dark and readable. Queue status has its own desktop column and sits beside the title on phones; Approve is outlined, Reject and Remove are quiet text controls. Keep the existing lifecycle and permission checks. Mobile rows retain touch-friendly actions and horizontally scrollable bottom navigation, including the existing 76px hosting-badge reserve. Guest pages retain their existing styles.
