@@ -183,7 +183,6 @@ test('every event dish has a real local photo and database catalogs receive upda
 test('every beverage variant has a local photo, shared variants match, and custom uploads survive', async () => {
   storage.clear()
   const menu = (await data.getOperations('owner')).menu.filter(item => !['mains', 'bites'].includes(item.category))
-  assert.equal(Object.keys(data.beveragePhotos).length, 40)
   for (const item of menu) {
     assert.ok(item.image, item.name)
     assert.ok(existsSync(new URL('../public' + item.image, import.meta.url)), item.image)
@@ -193,6 +192,47 @@ test('every beverage variant has a local photo, shared variants match, and custo
   const beer = menu.filter(item => item.name.startsWith('Carlsberg Extra Cold'))
   assert.equal(new Set(beer.map(item => item.image)).size, 1)
   assert.notEqual(data.beveragePhoto('draught', 'Carlsberg Extra Cold'), data.beveragePhoto('draught', 'Connor’s'))
+  assert.notEqual(data.beveragePhoto('bottle', 'Carlsberg Smooth'), data.beveragePhoto('bottle', 'Carlsberg Green Crate'))
+})
+
+test('the catalog refresh updates an existing demo without undoing later staff edits', async () => {
+  storage.clear()
+  const menu = await data.getMenu()
+  const martell = menu.find(item => item.name === 'Martell VSOP · Single')
+  const customItem = { id: 'custom-dish', name: 'Custom dish', category: 'bites', price: 12, available: true }
+  storage.set('malam-demo-v2', JSON.stringify({ menu: [
+    { ...martell, price: 680, image: 'https://example.com/custom-martell.webp' },
+    { id: 'retired-cocktail', name: 'Dry Martini', category: 'cocktails', price: 20, available: true },
+    { id: 'retired-juice', name: 'Cranberry Juice', category: 'soft', price: 12, available: true },
+    customItem,
+  ] }))
+  const updated = await data.getMenu()
+  assert.equal(updated.find(item => item.id === martell.id).price, 580)
+  assert.equal(updated.find(item => item.id === martell.id).image, 'https://example.com/custom-martell.webp')
+  assert.equal(updated.find(item => item.id === customItem.id).price, 12)
+  assert.ok(updated.every(item => !['Dry Martini', 'Cranberry Juice'].includes(item.name)))
+  assert.deepEqual(updated.filter(item => item.tag === 'BB02').map(item => item.price), [19, 90, 388])
+  assert.deepEqual(updated.filter(item => item.tag === 'S06').map(item => item.price), [580, 990])
+  for (const [name, category, price] of [
+    ['Grilled Chicken Chop with Hoisin Caramel Sauce', 'mains', 18],
+    ['Chicken Nuggets', 'bites', 17],
+    ['Fish Sauce Chicken Wing', 'bites', 16],
+    ['Pan Seared Dumpling with Spicy Ginger', 'bites', 15],
+    ['Chinese Chili Oil Dumpling', 'bites', 15],
+    ['Edamame', 'bites', 17],
+    ['DYRB Crispy Fish Skin', 'bites', 18],
+  ]) {
+    const dish = updated.find(item => item.name === name && !item.eventId)
+    assert.ok(dish, name)
+    assert.equal(dish.category, category, name)
+    assert.equal(dish.price, price, name)
+    assert.ok(existsSync(new URL('../public' + dish.image, import.meta.url)), name)
+  }
+  const edamame = updated.find(item => item.name === 'Edamame' && !item.eventId)
+  await data.saveMenuItem(edamame)
+  await data.saveMenuItem({ ...martell, price: 600 })
+  assert.equal((await data.getMenu()).find(item => item.id === martell.id).price, 600)
+  storage.clear()
 })
 
 
@@ -211,4 +251,24 @@ test('removed Call staff requests are rejected without creating a service record
   const before = (await data.getOperations('owner')).services
   await assert.rejects(data.submitService('08', 'Call staff'), /no longer available/)
   assert.deepEqual((await data.getOperations('owner')).services, before)
+})
+
+test('menu managers can add items, revise cents and replace event photos in demo storage', async () => {
+  storage.clear()
+  const created = await data.saveMenuItem({ name: 'New dish', category: 'mains', price: '12.30', image: 'https://example.com/custom.webp', available: true })
+  assert.equal((await data.getMenu()).find(row => row.id === created.id).price, 12.3)
+  await data.saveMenuItem({ ...created, price: '14.80', name: 'Updated dish' })
+  assert.equal((await data.getMenu()).find(row => row.id === created.id).name, 'Updated dish')
+  assert.equal((await data.getMenu()).find(row => row.id === created.id).price, 14.8)
+  const event = (await data.getOperations('owner')).menu.find(row => row.eventId)
+  await data.saveMenuItem({ ...event, image: 'https://example.com/new-event.webp', price: '22.90' })
+  const savedEvent = (await data.getOperations('owner')).menu.find(row => row.id === event.id)
+  assert.equal(savedEvent.image, 'https://example.com/new-event.webp')
+  assert.equal(savedEvent.price, 22.9)
+  for (const price of ['', '-1', '1.234', 'NaN', '10000000']) await assert.rejects(data.saveMenuItem({ ...created, price }), /price/)
+  await assert.rejects(data.saveMenuItem({ ...created, name: ' ' }), /name/)
+  await assert.rejects(data.saveMenuItem({ ...created, category: 'invalid' }), /category/)
+  assert.throws(() => data.validateMenuPhoto({ type: 'image/svg+xml', size: 1 }), /JPG/)
+  assert.throws(() => data.validateMenuPhoto({ type: 'image/png', size: 11 * 1024 * 1024 }), /10 MB/)
+  storage.clear()
 })

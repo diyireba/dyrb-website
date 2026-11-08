@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import {
   Activity, ArrowDownLeft, ArrowLeft, ArrowRight, ArrowUpRight, BadgeCheck, Beer, Check,
-  CheckCircle2, ChevronDown, ChevronRight, CircleHelp, ClipboardList, Clock3, Coffee, Crown,
+  CheckCircle2, ChevronDown, ChevronRight, CircleHelp, ClipboardList, Clock3, Crown,
   Disc3, Guitar, Heart, Languages, LayoutDashboard, LogOut, Menu as MenuIcon,
   Minus, Music2, Plus, QrCode, Search, Send, Settings2, Shield, ShoppingBag, SlidersHorizontal,
   Sparkles, Ticket, UserRound, Users, Utensils, X, Zap,
@@ -11,7 +11,7 @@ import {
   adminAction, adjustMember, demoPermissionMap, formatMoney, getMemberStoredItems, getMenu, getOperations, getPermissions,
   isLive, listenForDemoChanges, login, logout, permissionLabels, roles, roleLabels, saveMenuAvailability,
   savePermission, storedDrinkCatalog, submitOrder, submitSong, supabase, timeAgo, updateOrder,
-  updateSong, addSingerSong, saveMenuEvent, eventIsActive, createTable, updateTable,
+  updateSong, addSingerSong, saveMenuEvent, eventIsActive, createTable, updateTable, menuCategories, saveMenuItem, uploadMenuPhoto, validateMenuPhoto,
 } from './data.js'
 
 const copy = {
@@ -127,6 +127,11 @@ const zhMenuNames = {
   'Salted Egg Chicken Fried Rice': '咸蛋鸡肉炒饭',
   'Signature Mala Spicy Spaghetti with Chicken Chop': '招牌麻辣鸡扒意大利面',
   'Signature Fried Rice with Fried Egg': '招牌炒饭配煎蛋',
+  'Grilled Chicken Chop with Hoisin Caramel Sauce': '海鲜酱焦糖烤鸡扒',
+  'Chicken Nuggets': '炸鸡块', 'Fish Sauce Chicken Wing': '鱼露鸡翅',
+  'Pan Seared Dumpling with Spicy Ginger': '香煎饺配辣姜酱', 'Chinese Chili Oil Dumpling': '红油饺子',
+  'Edamame': '毛豆', 'DYRB Crispy Fish Skin': 'DYRB 香脆鱼皮',
+  'Carlsberg Green Crate': '嘉士伯绿瓶啤酒',
   'Enoki Mushroom': '金针菇', 'Oyster Mushroom': '鲍鱼菇', 'Broccoli': '西兰花', 'Lotus Root': '莲藕',
   'Taiwan Sausage (8 pcs)': '台湾香肠（8块）', 'Luncheon Meat': '午餐肉', 'Sausage': '香肠', 'Crispy Fucuk': '脆腐竹',
   'Chicken Popcorn': '鸡米花', 'Shoestring Potato Fries': '细薯条', 'Crispy Mixed Seafood Ball (8 pcs)': '香炸海鲜丸（8粒）',
@@ -158,7 +163,7 @@ function localizedMenuName(item, language) {
     ['Carlsberg Extra Cold', '嘉士伯超冰啤酒'], ['Carlsberg Smooth', '嘉士伯顺滑啤酒'], ["Connor’s", '康纳啤酒'],
     ['Sapporo Premium Beer', '札幌高级啤酒'], ['Happy Hour', '欢乐时光'], ['After 8pm', '晚上8点后'],
     ['Before 8pm', '晚上8点前'], ['1 mug', '1杯'], ['10 mugs', '10杯'], ['1 bottle', '1瓶'], ['5 bottles', '5瓶'], ['24 bottles', '24瓶'],
-    ['Singleton of Glen Ord 12 Yrs', '格兰欧德 12年'], ['Macallan 12 Yrs Double Cask', '麦卡伦 12年双桶'],
+    ['Singleton of Glen Ord 12 Yrs', '格兰欧德 12年'], ['Macallan 12 Yrs Double Cask', '麦卡伦 12年双桶'], ['Macallan 12 Yrs Sherry Oak', '麦卡伦 12年雪莉桶'],
     ['Hennessy VSOP', '轩尼诗 VSOP'], ['Martell VSOP', '马爹利 VSOP'], ['Martell Cordon Bleu', '马爹利蓝带'],
     ['Roku Suntory Japanese Gin', '六金酒（日式）'], [' · Single', ' · 单份'], [' · Twin', ' · 双份'],
   ]
@@ -425,6 +430,8 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
   const [orderReceipt, setOrderReceipt] = useState(null)
   const orderSendLock = useRef(false)
   const [drinkSearch, setDrinkSearch] = useState('')
+  const drinkSearchRef = useRef(null)
+  const menuAreaRef = useRef(null)
   const [menu, setMenu] = useState([])
   const [beforeEight, setBeforeEight] = useState(isBeforeEightInMalaysia)
   const [menuGroup, setMenuGroup] = useState('food')
@@ -460,11 +467,23 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
   const categories = menuGroup === 'food'
     ? [{ id: 'mains', label: t.food }, { id: 'bites', label: t.bites }]
     : [{ id: 'draught', label: t.draught }, { id: 'bottle', label: t.bottle }, { id: 'cocktails', label: t.cocktails }, { id: 'mocktails', label: t.mocktails }, { id: 'soft', label: t.soft }, { id: 'spirits', label: t.spirits }]
-  useEffect(() => { if (menu.length && !menu.some(item => item.category === category)) setCategory(menu.find(item => menuGroup === 'food' ? ['mains', 'bites'].includes(item.category) : !['mains', 'bites'].includes(item.category))?.category || 'mains') }, [menu, category, menuGroup])
-  function selectMenuGroup(group) { setMenuGroup(group); setDrinkSearch(''); setCategory(group === 'food' ? 'mains' : 'draught') }
+  const visibleCategories = categories.filter(({ id }) => menu.some(item => item.category === id))
+  const activeCategory = visibleCategories.find(({ id }) => id === category) || visibleCategories[0]
+  function selectCategory(id) {
+    setCategory(id)
+    setDrinkSearch('')
+    const area = menuAreaRef.current
+    if (area && area.getBoundingClientRect().top < area.closest('.guest-page').querySelector('.guest-topbar').getBoundingClientRect().bottom) {
+      area.scrollIntoView({ block: 'start' })
+    }
+  }
+  function selectMenuGroup(group) {
+    setMenuGroup(group)
+    selectCategory(group === 'food' ? 'mains' : 'draught')
+  }
   const searchQuery = menuGroup === 'beverages' ? drinkSearch.trim().toLocaleLowerCase() : ''
   const filtered = menu.filter(item => {
-    if (searchQuery ? ['mains', 'bites'].includes(item.category) : item.category !== category) return false
+    if (searchQuery ? ['mains', 'bites'].includes(item.category) : item.category !== activeCategory?.id) return false
     if (item.category === 'draught' && draughtPeriod(item) && draughtPeriod(item) !== (beforeEight ? 'happy-hour' : 'after-eight')) return false
     return !searchQuery || [localizedMenuName(item, 'en'), localizedMenuName(item, language), item.bm, item.description, item.descriptionBm, localizedMenuServing(item, language)].filter(Boolean).join(' ').toLocaleLowerCase().includes(searchQuery)
   })
@@ -549,45 +568,70 @@ function GuestPage({ tableCode, language, setLanguage, tab, onTabChange, onStaff
     {!tableCode && <div className="form-error" role="alert">Scan the QR code at your table before sending an order or request. Ask staff if you need help.</div>}
     <div className="guest-layout">
       <section className="guest-main-column">
-        <div className={`guest-section-heading ${tab === 'menu' ? 'compact-menu-heading' : ''}`}><div className="guest-heading-copy">{tab !== 'member' && <><h2>{tab === 'menu' ? t.menuTitle : t.requestSong}</h2><p>{tab === 'menu' ? t.menuCopy : t.songCopy}</p></>}</div>
+        <div className={`guest-section-heading ${tab === 'menu' ? 'compact-menu-heading' : ''}`}><div className="guest-heading-copy">{tab === 'menu' ? <h1>{t.menuTitle}</h1> : tab === 'songs' && <><h2>{t.requestSong}</h2><p>{t.songCopy}</p></>}</div>
           <nav className="guest-tabs" aria-label="Guest services">
-            <button className={tab === 'menu' ? 'active' : ''} onClick={() => setTab('menu')}><Utensils size={17} />{t.menu}</button>
-            <button className={tab === 'songs' ? 'active' : ''} onClick={() => setTab('songs')}><Music2 size={17} />{t.songs}</button>
+            <button className={tab === 'menu' ? 'active' : ''} aria-current={tab === 'menu' ? 'page' : undefined} onClick={() => setTab('menu')}><Utensils size={17} />{t.menu}</button>
+            <button className={tab === 'songs' ? 'active' : ''} aria-current={tab === 'songs' ? 'page' : undefined} onClick={() => setTab('songs')}><Music2 size={17} />{t.songs}</button>
             <button className={tab === 'member' ? 'active' : ''} onClick={() => setTab('member')}><UserRound size={17} />{t.member}</button>
           </nav>
         </div>
 
-        {tab === 'menu' && <div className="menu-area">
-          <div className="menu-navigation"><div className="menu-group-tabs" role="group" aria-label={language === 'zh' ? '菜单分类' : 'Menu type'}>
-            <button className={menuGroup === 'food' ? 'active' : ''} aria-pressed={menuGroup === 'food'} onClick={() => selectMenuGroup('food')}><Utensils size={15} />{t.foodGroup}</button>
-            <button className={menuGroup === 'beverages' ? 'active' : ''} aria-pressed={menuGroup === 'beverages'} onClick={() => selectMenuGroup('beverages')}><Beer size={15} />{t.beverageGroup}</button>
-          </div>
-          {menu.some(item => item.eventId) && <div className="event-menu-banner"><strong>{menu.find(item => item.eventId)?.eventName || 'Special event'}</strong><span>{language === 'bm' ? 'Menu makanan khas' : language === 'zh' ? '特别活动餐单' : 'Special event food menu'}</span></div>}<div className="menu-category-row"><div className="category-tabs">{categories.filter(item => menu.some(row => row.category === item.id)).map((item) => <button key={item.id} className={category === item.id ? 'active' : ''} aria-pressed={category === item.id} onClick={() => { setCategory(item.id); setDrinkSearch('') }}>{item.label}</button>)}</div></div>
-          {menuGroup === 'beverages' && <div className="beverage-search"><Search size={17} aria-hidden="true" /><input type="search" aria-label={t.searchDrinks} placeholder={t.searchDrinks} value={drinkSearch} maxLength={80} onChange={event => setDrinkSearch(event.target.value)} />{drinkSearch && <button aria-label={t.clearSearch} onClick={() => setDrinkSearch('')}><X size={16} /></button>}</div>}</div>
-          <div className="menu-list">{menuLoading && !menu.length && <div className="loading-screen" role="status">{t.loading}</div>}{menuError && <div className="form-error" role="alert">{menuError}<button className="secondary-button" onClick={loadMenu}>Try again</button></div>}{!menuLoading && !menuError && !menuCards.length && <EmptyState icon={Utensils} title={searchQuery ? t.noDrinksFound : (language === 'zh' ? '此分类暂无商品。' : language === 'bm' ? 'Tiada item dalam kategori ini.' : 'No items in this category yet.')} />}{menuCards.map(({ item, variants }, index) => {
-            const itemName = localizedMenuName(item, language)
-            const itemDescription = localizedMenuDescription(item, language)
-            const itemPeriod = localizedMenuPeriod(item, language)
-            const beveragePhoto = beveragePhotoClasses[item.category]
-            if (variants.length > 1) return <article key={item.id} className={`menu-item menu-item-combined ${variants.every((variant) => !variant.available) ? 'disabled' : ''}`}>
-              <div className={`menu-thumb ${item.image ? 'has-image' : beveragePhoto || `thumb-${index + 1}`}`}>{item.image ? <img src={item.image} alt="" /> : beveragePhoto ? null : <Beer size={26} />}</div>
-              <div className="menu-item-copy">
-                <div className="menu-item-title-row"><div className="menu-item-heading">{itemPeriod && <span className="menu-period-label">{itemPeriod}</span>}<h3>{itemName}</h3></div></div>
-                {item.category !== 'draught' && itemDescription && <p>{itemDescription}</p>}
-                <div className="menu-variant-list">
-                  <div className="menu-variant-head"><span />{item.tag && <span className="item-tag menu-item-code">{item.tag}</span>}</div>
-                  {variants.map((variant) => <div className="menu-variant-row" key={variant.id}>
+        {tab === 'menu' && <div className="menu-area" ref={menuAreaRef}>
+          <nav className="menu-navigation" aria-label={t.menuTitle}>
+            <div className="menu-group-tabs">
+              <button className={menuGroup === 'food' ? 'active' : ''} aria-pressed={menuGroup === 'food'} onClick={() => selectMenuGroup('food')}><Utensils size={17} />{t.foodGroup}</button>
+              <button className={menuGroup === 'beverages' ? 'active' : ''} aria-pressed={menuGroup === 'beverages'} onClick={() => selectMenuGroup('beverages')}><Beer size={17} />{t.beverageGroup}</button>
+            </div>
+            {visibleCategories.length > 0 && <div className="menu-category-row">
+              <div className="category-tabs" role="group" aria-label={menuGroup === 'food' ? t.foodGroup : t.beverageGroup}>
+                {visibleCategories.map(({ id, label }) => {
+                  const selected = !searchQuery && activeCategory?.id === id
+                  return <button key={id} className={selected ? 'active' : ''} aria-pressed={selected} onClick={() => selectCategory(id)}>{label}</button>
+                })}
+              </div>
+            </div>}
+          </nav>
+          <section className="kiosk-catalog" aria-labelledby="kiosk-category-title">
+            {menu.some(item => item.eventId) && <div className="event-menu-banner"><strong>{menu.find(item => item.eventId)?.eventName || 'Special event'}</strong><span>{language === 'bm' ? 'Menu makanan khas' : language === 'zh' ? '特别活动餐单' : 'Special event food menu'}</span></div>}
+            <h2 id="kiosk-category-title" aria-live="polite">{searchQuery ? t.searchDrinks : activeCategory?.label || (menuGroup === 'food' ? t.foodGroup : t.beverageGroup)}</h2>
+            {menuGroup === 'beverages' && <div className="beverage-search">
+              <Search size={17} aria-hidden="true" />
+              <input ref={drinkSearchRef} type="search" aria-label={t.searchDrinks} placeholder={t.searchDrinks} value={drinkSearch} maxLength={80} onChange={event => setDrinkSearch(event.target.value)} />
+              {drinkSearch && <button aria-label={t.clearSearch} onClick={() => { setDrinkSearch(''); drinkSearchRef.current?.focus() }}><X size={16} /></button>}
+            </div>}
+            {menuLoading && !menu.length && <div className="loading-screen" role="status">{t.loading}</div>}
+            {menuError && <div className="form-error" role="alert">{menuError}<button className="secondary-button" onClick={loadMenu}>Try again</button></div>}
+            {!menuLoading && !menuError && !menuCards.length && <EmptyState icon={Utensils} title={searchQuery ? t.noDrinksFound : (language === 'zh' ? '此分类暂无商品。' : language === 'bm' ? 'Tiada item dalam kategori ini.' : 'No items in this category yet.')} />}
+            <div className="menu-list">{menuCards.map(({ item, variants }, index) => {
+              const itemName = localizedMenuName(item, language)
+              const itemDescription = localizedMenuDescription(item, language)
+              const itemPeriod = localizedMenuPeriod(item, language)
+              const beveragePhoto = beveragePhotoClasses[item.category]
+              const combined = variants.length > 1
+              return <article key={item.id} className={`menu-item ${combined ? 'menu-item-combined' : ''} ${variants.every(variant => !variant.available) ? 'disabled' : ''}`}>
+                <div className="kiosk-item-header">
+                  <div className={`menu-thumb ${item.image ? 'has-image' : beveragePhoto || `thumb-${index + 1}`}`} aria-hidden="true">
+                    {item.image ? <img src={item.image} alt="" loading="lazy" /> : !beveragePhoto && (menuGroup === 'food' ? <Utensils size={22} /> : <Beer size={22} />)}
+                  </div>
+                  <div className="menu-item-heading">
+                    {combined && itemPeriod && <span className="menu-period-label">{itemPeriod}</span>}
+                    <h3>{itemName}</h3>
+                    {item.tag && <span className="item-tag menu-item-code">{item.tag}</span>}
+                  </div>
+                </div>
+                {itemDescription && !(combined && item.category === 'draught') && <p className="kiosk-item-description">{itemDescription}</p>}
+                {combined ? <div className="menu-variant-list">
+                  {variants.map(variant => <div className="menu-variant-row" key={variant.id}>
                     <div className="menu-variant-info"><span>{localizedMenuServing(variant, language)}</span><strong>{formatMoney(variant.price)}</strong></div>
                     {renderAddControl(variant)}
                   </div>)}
-                </div>
-              </div>
-            </article>
-            return <article key={item.id} className={`menu-item ${!item.available ? 'disabled' : ''}`}>
-            <div className={`menu-thumb ${item.image ? 'has-image' : beveragePhoto || `thumb-${index + 1}`}`}>{item.image ? <img src={item.image} alt="" /> : beveragePhoto ? null : ['draught', 'bottle', 'spirits'].includes(item.category) ? <Beer size={26} /> : <Coffee size={25} />}</div>
-            <div className="menu-item-copy"><div className="menu-item-title-row"><div className="menu-item-heading"><h3>{itemName}</h3></div></div>{itemDescription && <p>{itemDescription}</p>}<div className="menu-item-price"><strong>{formatMoney(item.price)}</strong></div></div>
-            <div className="menu-item-action">{item.tag && <span className="item-tag menu-item-code">{item.tag}</span>}{renderAddControl(item)}</div>
-          </article>})}</div>
+                </div> : <div className="kiosk-item-footer">
+                  <strong>{formatMoney(item.price)}</strong>
+                  <div className="menu-item-action">{renderAddControl(item)}</div>
+                </div>}
+              </article>
+            })}</div>
+          </section>
         </div>}
 
         {tab === 'songs' && <div className="guest-feature-grid song-request-layout">
@@ -881,7 +925,7 @@ function EventMenuControl({ event, canManage, busy, run }) {
   const value = draft || event
   if (!value) return <section className="surface-card event-settings">Event settings unavailable. Apply the event-menu database migration to enable this feature.</section>
   const change = (key, next) => setDraft(current => ({ ...(current || event), [key]: next }))
-  return <section className="surface-card event-settings"><div><span className="section-eyebrow">SPECIAL EVENT</span><h2>{event.name}</h2><p>Replaces regular food with 5 mains and 8 side dishes. Draught beer, bottle beer, spirits and mocktails stay unchanged.</p><strong>{eventIsActive(event) ? 'Event menu is visible' : 'Regular menu is visible'}</strong></div>
+  return <section className="surface-card event-settings"><div><span className="section-eyebrow">SPECIAL EVENT</span><h2>{event.name}</h2><p>Replaces regular food with the special-event food menu. Draught beer, bottle beer, spirits and mocktails stay unchanged.</p><strong>{eventIsActive(event) ? 'Event menu is visible' : 'Regular menu is visible'}</strong></div>
     <ValidatedForm onSubmit={async e => { e.preventDefault(); if (await run(() => saveMenuEvent(value))) setDraft(null) }}>
       <fieldset disabled={!canManage || busy}><label className="event-name-field">Event name<input type="text" required maxLength={80} value={value.name} onChange={e => change('name', e.target.value)} placeholder="e.g. Halloween Night, Christmas Eve" /></label><label className="event-check"><input type="checkbox" checked={value.enabled} onChange={e => change('enabled', e.target.checked)} />Enable event menu</label>
       <p>Leave dates empty to switch manually. Optional dates use Malaysia time (UTC+8); the end time is exclusive.</p>
@@ -894,9 +938,64 @@ function EventMenuControl({ event, canManage, busy, run }) {
     </ValidatedForm></section>
 }
 
+function MenuItemEditor({ item, menuEvent, busy, run, onClose }) {
+  const [draft, setDraft] = useState(() => ({ name: '', bm: '', category: 'mains', price: '', description: '', descriptionBm: '', image: '', available: true, eventId: '', tag: '', ...item }))
+  const [file, setFile] = useState(null)
+  const [preview, setPreview] = useState('')
+  const [error, setError] = useState('')
+  const [dirty, setDirty] = useState(false)
+  const [discard, setDiscard] = useState(false)
+  const lock = useRef(false)
+  const close = () => { if (busy || lock.current) return; if (dirty) setDiscard(true); else onClose() }
+  useModalFocus(true, close, '.menu-item-dialog')
+  useEffect(() => { if (!file) { setPreview(''); return }; const url = URL.createObjectURL(file); setPreview(url); return () => URL.revokeObjectURL(url) }, [file])
+  useEffect(() => { if (!dirty) return; const warn = e => { e.preventDefault(); e.returnValue = '' }; window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn) }, [dirty])
+  const change = (key, value) => { setDraft(current => ({ ...current, [key]: value })); setDirty(true); setError(''); setDiscard(false) }
+  async function submit(e) {
+    e.preventDefault()
+    if (lock.current) return
+    lock.current = true; setError('')
+    try {
+      const saved = await run(async () => {
+        try {
+          let image = draft.image
+          if (file) { image = await uploadMenuPhoto(file); setDraft(current => ({ ...current, image })); setFile(null) }
+          await saveMenuItem({ ...draft, image })
+        } catch (cause) { setError(cause.message); throw cause }
+      })
+      if (saved) onClose()
+    } finally { lock.current = false }
+  }
+  return <div className="modal-backdrop"><section className="action-dialog menu-item-dialog" role="dialog" aria-modal="true" aria-labelledby="menu-editor-title" aria-busy={busy}>
+    <div className="dialog-heading"><h2 id="menu-editor-title">{item?.id ? 'Edit menu item' : 'Add menu item'}</h2><button type="button" className="icon-button" aria-label="Close menu editor" disabled={busy} onClick={close}><X size={20} /></button></div>
+    <p>Save names, prices and photos directly to your menu.</p>
+    <ValidatedForm onSubmit={submit}><fieldset disabled={busy}>
+      <label>Item name<input required maxLength={120} value={draft.name} onChange={e => change('name', e.target.value)} /></label>
+      <div className="form-row"><label>Category<select value={draft.category} onChange={e => change('category', e.target.value)}>{Object.entries(menuCategories).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label><label>Price (RM)<input required type="number" inputMode="decimal" min="0" max="9999999.99" step="0.01" value={draft.price} onChange={e => change('price', e.target.value)} /></label></div>
+      <label>Menu<select value={draft.eventId || ''} onChange={e => change('eventId', e.target.value)}><option value="">Regular menu</option>{menuEvent && <option value={menuEvent.id}>{menuEvent.name}</option>}</select></label>
+      <small>Special-event items appear only while that event menu is enabled.</small>
+      <label>Serving / description<input maxLength={500} value={draft.description} onChange={e => change('description', e.target.value)} placeholder="e.g. 1 bottle or 5 bottles" /></label>
+      <details><summary>Optional Bahasa Malaysia text</summary><label>Bahasa Malaysia name<input maxLength={120} value={draft.bm} onChange={e => change('bm', e.target.value)} /></label><label>Bahasa Malaysia description<input maxLength={500} value={draft.descriptionBm} onChange={e => change('descriptionBm', e.target.value)} /></label></details>
+      <label>Photo<input type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="menu-photo-help" onChange={e => { const next = e.target.files?.[0]; if (!next) return; try { validateMenuPhoto(next); setFile(next); setDirty(true); setError('') } catch (cause) { setError(cause.message); e.target.value = '' } }} /></label>
+      <small id="menu-photo-help">JPG, PNG or WebP, up to 10 MB. Photos are resized automatically.</small>
+      {(preview || draft.image) && <img className="menu-photo-preview" src={preview || draft.image} alt="Menu photo preview" />}
+      {file && <div className="menu-photo-selection"><span>{file.name}</span><button type="button" className="secondary-button" onClick={() => setFile(null)}>Undo photo selection</button></div>}
+      <label className="event-check"><input type="checkbox" checked={draft.available} onChange={e => change('available', e.target.checked)} />Available to order</label>
+    </fieldset>
+    {error && <p className="form-error" role="alert">{error}</p>}
+    {discard ? <div className="menu-discard" role="alert"><p>Discard your unsaved changes?</p><button type="button" className="secondary-button" onClick={() => setDiscard(false)}>Keep editing</button><button type="button" className="secondary-button" onClick={onClose}>Discard changes</button></div> : <div className="dialog-actions"><button type="button" className="secondary-button" disabled={busy} onClick={close}>Cancel</button><button className="primary-button" type="submit" disabled={busy}>{busy ? 'Saving item…' : 'Save menu item'}</button></div>}
+    </ValidatedForm></section></div>
+}
+
 function MenuAdminPage({ data, canManage, t, run, busy }) {
   const items = data?.menu || []
-  return <div className="page-stack"><div className="page-heading-row"><div><span className="section-eyebrow">GUEST MENU · AVAILABILITY</span><h1>{t.menuControl}</h1><p>{t.menuSub}</p></div>{canManage && <span className="readiness-pill"><span className="live-dot" />Guest menu live</span>}</div><EventMenuControl event={data?.menuEvent} canManage={canManage} busy={busy} run={run} /><section className="surface-card menu-admin-card"><div className="menu-admin-head"><div><h2>Menu items</h2><p>Availability updates immediately on the guest page.</p></div><span>{items.length} items</span></div>{items.map((item, i) => <div className="menu-admin-row" key={item.id}><div className="menu-admin-thumb">{item.image ? <img src={item.image} alt="" /> : ['draught', 'bottle', 'spirits'].includes(item.category) ? <Beer size={19} /> : <Utensils size={19} />}</div><div className="menu-admin-copy"><strong>{item.name}</strong><small>{item.eventId ? `${data?.menuEvent?.name || "Special event"} · ` : "Regular · "}{item.category} · {formatMoney(item.price)}</small></div><span className={`menu-availability ${item.available ? 'on' : 'off'}`}>{item.available ? t.available : t.soldOut}</span><button className={`toggle-switch ${item.available ? 'on' : ''}`} role="switch" aria-checked={item.available} aria-label={`${item.available ? 'Disable' : 'Enable'} ${item.name}`} disabled={!canManage || busy} onClick={() => run(() => saveMenuAvailability(item.id, !item.available))}><span /></button></div>)}</section>{!canManage && <div className="dashboard-footnote"><Shield size={14} />View-only menu access</div>}</div>
+  const [editing, setEditing] = useState(null)
+  return <div className="page-stack"><div className="page-heading-row"><div><span className="section-eyebrow">GUEST MENU</span><h1>Menu management</h1><p>Add items, update prices and upload your own photos.</p></div>{canManage && <button className="primary-button" disabled={busy} onClick={() => setEditing({})}><Plus size={16} />Add menu item</button>}</div>
+    <section className="surface-card menu-admin-card"><div className="menu-admin-head"><div><h2>Menu items</h2><p>Saved changes appear on the guest menu within 30 seconds.</p></div><span>{items.length} items</span></div>
+    {!items.length && <p>No menu items yet. Add your first dish or drink.</p>}
+    {items.map(item => <div className="menu-admin-row menu-editable-row" key={item.id}><div className="menu-admin-thumb">{item.image ? <img src={item.image} alt="" loading="lazy" /> : <Utensils size={19} />}</div><div className="menu-admin-copy"><strong>{item.name}</strong><small>{item.eventId ? `${data?.menuEvent?.name || 'Special event'} · ` : 'Regular · '}{menuCategories[item.category]} · {formatMoney(item.price)}</small>{item.description && <small>{item.description}</small>}</div>{canManage && <button className="secondary-button menu-edit-button" disabled={busy} onClick={() => setEditing(item)} aria-label={`Edit ${item.name}`}>Edit</button>}<span className={`menu-availability ${item.available ? 'on' : 'off'}`}>{item.available ? t.available : t.soldOut}</span><button className={`toggle-switch ${item.available ? 'on' : ''}`} role="switch" aria-checked={item.available} aria-label={`${item.available ? 'Disable' : 'Enable'} ${item.name}`} disabled={!canManage || busy} onClick={() => run(() => saveMenuAvailability(item.id, !item.available))}><span /></button></div>)}</section>
+    <EventMenuControl event={data?.menuEvent} canManage={canManage} busy={busy} run={run} />
+    {canManage && editing && <MenuItemEditor item={editing} menuEvent={data?.menuEvent} busy={busy} run={run} onClose={() => setEditing(null)} />}{!canManage && <div className="dashboard-footnote"><Shield size={14} />View-only menu access</div>}</div>
 }
 
 function StaffPage({ data, role, userId, t, run, busy, setDialog }) {

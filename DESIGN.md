@@ -13,10 +13,10 @@ Make the guest menu feel like DYRB's night-time bar: charcoal surfaces, bright o
 - Staff credentials are labelled User ID and Passcode; member credentials remain phone and PIN. Reuse ValidatedForm, existing notifications and role-based account management. Neither login sends SMS.
 
 - Guest pages start with the table number and the next useful action.
-- Customer menu navigation is compact with a sticky food/drink/category strip and beverage search across categories. Food photo sizes stay unchanged by user request. Staff access belongs in the guest footer.
+- The customer menu uses a kiosk-style category rail on wide screens and a sticky, horizontally scrollable category strip on phones. Beverage search covers all drink categories. Staff access belongs in the guest footer.
 - Mobile basket bars appear only with items and show item count, total, table and View order. Reserve 76px plus safe area below the basket and dialogs for the hosting badge. Basket review has explicit removal, unit/line prices and quantity controls. A server-confirmed receipt shows table/items and a Back to menu action; failed submissions preserve the basket.
 - Food and drinks remain separate, with short category labels and readable prices.
-- Menu items are compact, touch friendly rows. Keep add and quantity controls obvious.
+- Menu items use touch-friendly tiles with a compact thumbnail, visible price, and dedicated add or quantity controls. Keep existing photo sizes. On narrow phones, drinks with multiple serving sizes span the grid so each option stays readable.
 - On desktop, the basket can sit beside the menu. On tablet and phone, keep it in a persistent bottom bar with an easy to open basket sheet.
 - Staff pages use a compact dark navigation rail on larger screens and clear bottom navigation on phones. Keep work surfaces light for legibility.
 - Use the logo's orange-red as the only strong accent. Reserve green for successful actions and status.

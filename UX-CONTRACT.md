@@ -28,9 +28,9 @@ Staff use individually assigned accounts. The dashboard shows only the sections 
 
 ## Responsive behavior
 
-- Phone: one-column guest menu, fixed basket bar, modal basket sheet, stacked request forms, and compact staff bottom navigation.
+- Phone: two-column guest menu with full-width tiles for drinks with multiple serving sizes, sticky category controls, fixed basket bar, modal basket sheet, stacked request forms, and compact staff bottom navigation.
 - Tablet: use available width for menu rows and staff content; keep the basket reachable without narrowing the menu into a second column.
-- Desktop: allow the guest basket rail and full staff navigation where there is room.
+- Desktop: show the category rail to the left of the guest menu on wide screens, with the basket rail on the right where there is room. Show full staff navigation where there is room.
 - All controls must have visible focus and comfortable touch targets.
 
 ## Shared behavior owners
@@ -57,6 +57,8 @@ Staff use individually assigned accounts. The dashboard shows only the sections 
 | CRUD | Dashboard run and data services | src/App.jsx and src/data.js | Save in place; close on success | Order lifecycle and form recovery |
 
 ## Event menu
+
+Menu item editing uses MenuItemEditor, the shared modal focus trap, ValidatedForm and Dashboard run. menu.manage controls item writes and photo uploads through database/storage policies. Native category/menu selects use platform popups. Drafts and uploaded image URLs survive save failures; duplicate submissions and closing while saving are blocked. Cancel/Escape asks before discarding changes, and page unload warns on a dirty draft. Photo input accepts JPG/PNG/WebP up to 10 MB, decodes and resizes to 1200px, then uploads at most 2 MB with a unique immutable URL. Local previews are revoked when replaced or closed. Guest polling and existing server order validation apply to edited prices. See docs/MENU-MANAGEMENT.md for the one-time setup.
 
 Source: user request, 17 October 2026; `supabase/event-menu.sql` owns permissions and visibility. Menu managers can enable Halloween Night manually with optional start/end bounds. Active event food replaces regular food. The end bound is exclusive. Drinks stay unchanged except cocktails and soft drinks, which require explicit inclusion. Event status defaults off. Date controls use native datetime-local inputs (platform calendar accepted), with explicit Malaysia timezone conversion; shared ValidatedForm and Dashboard run own validation and feedback. Drafts survive failed saves. Guest menu polls every 30 seconds and is revalidated on submission; database trigger rejects hidden items even for stale clients.
 

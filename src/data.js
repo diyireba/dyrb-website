@@ -39,6 +39,7 @@ export const beveragePhotos = {
   "draught|Connor’s": "/images/drink-draught-connor-s.webp",
   "draught|Sapporo Premium Beer": "/images/drink-draught-sapporo-premium-beer.webp",
   "bottle|Carlsberg Smooth": "/images/drink-bottle-carlsberg-smooth.webp",
+  "bottle|Carlsberg Green Crate": "/images/drink-bottle-carlsberg-green-crate.webp",
   "cocktails|Blue Lagoon": "/images/drink-cocktails-blue-lagoon.webp",
   "cocktails|Daiquiri": "/images/drink-cocktails-daiquiri.webp",
   "cocktails|Dry Martini": "/images/drink-cocktails-dry-martini.webp",
@@ -67,6 +68,7 @@ export const beveragePhotos = {
   "soft|Mineral Water": "/images/drink-soft-mineral-water.webp",
   "spirits|Singleton of Glen Ord 12 Yrs": "/images/drink-spirits-singleton-of-glen-ord-12-yrs.webp",
   "spirits|Macallan 12 Yrs Double Cask": "/images/drink-spirits-macallan-12-yrs-double-cask.webp",
+  "spirits|Macallan 12 Yrs Sherry Oak": "/images/drink-spirits-macallan-12-yrs-sherry-oak.webp",
   "spirits|Hennessy VSOP": "/images/drink-spirits-hennessy-vsop.webp",
   "spirits|Martell VSOP": "/images/drink-spirits-martell-vsop.webp",
   "spirits|Martell Cordon Bleu": "/images/drink-spirits-martell-cordon-bleu.webp",
@@ -90,6 +92,7 @@ const menuSeed = [
   ['mains', 'Salted Egg Chicken Fried Rice', 'Nasi Goreng Ayam Telur Masin', 19, '', '', 'F06', '/images/food-f06.jpg'],
   ['mains', 'Signature Mala Spicy Spaghetti with Chicken Chop', 'Spageti Mala Pedas Istimewa dengan Ayam Panggang', 21, '', '', 'F07', '/images/food-f07.jpg'],
   ['mains', 'Signature Fried Rice with Fried Egg', 'Nasi Goreng Istimewa dengan Telur Goreng', 12, '', '', 'F08', '/images/food-f08.jpg'],
+  ['mains', 'Grilled Chicken Chop with Hoisin Caramel Sauce', 'Ayam Panggang dengan Sos Karamel Hoisin', 18, '', '', 'F15', '/images/food-hoisin-caramel-chicken-chop.webp'],
   // Xiang la and skewers
   ['bites', 'Enoki Mushroom', 'Cendawan Enoki', 11, '', '', 'F01', '/images/food-s01.jpg'],
   ['bites', 'Oyster Mushroom', 'Cendawan Tiram', 11, '', '', 'F02', '/images/food-s02.jpg'],
@@ -105,6 +108,12 @@ const menuSeed = [
   ['bites', 'Smoked Duck Skewer (3 pcs)', 'Sate Itik Salai (3 cucuk)', 16, '', '', 'F12', '/images/food-s12.jpg'],
   ['bites', 'Chicken Skewer (3 pcs)', 'Sate Ayam (3 cucuk)', 16, '', '', 'F13', '/images/food-s13.jpg'],
   ['bites', 'Pork Skewer (3 pcs)', 'Sate Babi (3 cucuk)', 16, '', '', 'F14', '/images/food-s14.jpg'],
+  ['bites', 'Chicken Nuggets', 'Nuget Ayam', 17, '', '', 'F16', '/images/event-chicken-nugget.webp'],
+  ['bites', 'Fish Sauce Chicken Wing', 'Sayap Ayam Sos Ikan', 16, '', '', 'F17', '/images/food-fish-sauce-chicken-wing.webp'],
+  ['bites', 'Pan Seared Dumpling with Spicy Ginger', 'Ladu Goreng Kuali dengan Halia Pedas', 15, '', '', 'F18', '/images/food-pan-seared-dumpling-spicy-ginger.webp'],
+  ['bites', 'Chinese Chili Oil Dumpling', 'Ladu Cina dengan Minyak Cili', 15, '', '', 'F19', '/images/food-chinese-chili-oil-dumpling.webp'],
+  ['bites', 'Edamame', 'Edamame', 17, 'Edamame pods', 'Kacang edamame dalam kulit', 'F20', '/images/event-edamame.webp'],
+  ['bites', 'DYRB Crispy Fish Skin', 'Kulit Ikan Rangup DYRB', 18, '', '', 'F21', '/images/food-dyrb-crispy-fish-skin.webp'],
   // Draught beer prices shown as separate menu choices for happy hour and after 8pm
   ['draught', 'Carlsberg Extra Cold · 1 mug', 'Carlsberg Extra Cold · 1 mug', 15.8, 'Before 8pm', 'Sebelum 8 malam', 'DC01'],
   ['draught', 'Carlsberg Extra Cold · 10 mugs', 'Carlsberg Extra Cold · 10 mug', 148, 'Before 8pm', 'Sebelum 8 malam', 'DC01'],
@@ -121,11 +130,13 @@ const menuSeed = [
   ['bottle', 'Carlsberg Smooth · 1 bottle', 'Carlsberg Smooth · 1 botol', 19, '', '', 'BB01'],
   ['bottle', 'Carlsberg Smooth · 5 bottles', 'Carlsberg Smooth · 5 botol', 90, '', '', 'BB01'],
   ['bottle', 'Carlsberg Smooth · 24 bottles', 'Carlsberg Smooth · 24 botol', 388, '', '', 'BB01'],
+  ['bottle', 'Carlsberg Green Crate · 1 bottle', 'Carlsberg Green Crate · 1 botol', 19, '', '', 'BB02'],
+  ['bottle', 'Carlsberg Green Crate · 5 bottles', 'Carlsberg Green Crate · 5 botol', 90, '', '', 'BB02'],
+  ['bottle', 'Carlsberg Green Crate · 24 bottles', 'Carlsberg Green Crate · 24 botol', 388, '', '', 'BB02'],
   // Cocktails and mocktails
   ['cocktails', 'DYRB Special (Haaland)', 'Koktel Istimewa DYRB (Haaland)', 20, '', '', 'CT01'],
   ['cocktails', 'Blue Lagoon', 'Blue Lagoon', 25, '', '', 'CT02'],
   ['cocktails', 'Daiquiri', 'Daiquiri', 18, '', '', 'CT03'],
-  ['cocktails', 'Dry Martini', 'Dry Martini', 20, '', '', 'CT04'],
   ['cocktails', 'Long Island Ice Tea', 'Long Island Ice Tea', 20, '', '', 'CT05'],
   ['cocktails', 'Margarita', 'Margarita', 20, '', '', 'CT06'],
   ['cocktails', 'Negroni', 'Negroni', 25, '', '', 'CT07'],
@@ -145,7 +156,6 @@ const menuSeed = [
   ['soft', 'Fresh Lime Juice', 'Jus Limau Nipis Segar', 12, '', '', 'NA05'],
   ['soft', 'Fresh Lemon Tea', 'Teh Lemon Segar', 12, '', '', 'NA06'],
   ['soft', 'Fresh Honey Lemon', 'Lemon Madu Segar', 12, '', '', 'NA07'],
-  ['soft', 'Cranberry Juice', 'Jus Kranberi', 12, '', '', 'NA08'],
   ['soft', 'Ayataka Green Tea', 'Teh Hijau Ayataka', 10, '', '', 'NA09'],
   ['soft', 'Coke', 'Coca-Cola', 10, '', '', 'NA10'],
   ['soft', 'Sprite', 'Sprite', 10, '', '', 'NA11'],
@@ -156,14 +166,16 @@ const menuSeed = [
   // Bottle spirits; each picture lists single and twin pours.
   ['spirits', 'Singleton of Glen Ord 12 Yrs · Single', 'Singleton of Glen Ord 12 Tahun · Single', 480, 'Whisky', 'Wiski', 'S04'],
   ['spirits', 'Singleton of Glen Ord 12 Yrs · Twin', 'Singleton of Glen Ord 12 Tahun · Twin', 880, 'Whisky', 'Wiski', 'S04'],
-  ['spirits', 'Macallan 12 Yrs Double Cask · Single', 'Macallan 12 Tahun Double Cask · Single', 580, 'Whisky', 'Wiski', 'S05'],
+  ['spirits', 'Macallan 12 Yrs Double Cask · Single', 'Macallan 12 Tahun Double Cask · Single', 550, 'Whisky', 'Wiski', 'S05'],
   ['spirits', 'Macallan 12 Yrs Double Cask · Twin', 'Macallan 12 Tahun Double Cask · Twin', 990, 'Whisky', 'Wiski', 'S05'],
+  ['spirits', 'Macallan 12 Yrs Sherry Oak · Single', 'Macallan 12 Tahun Sherry Oak · Single', 580, 'Whisky', 'Wiski', 'S06'],
+  ['spirits', 'Macallan 12 Yrs Sherry Oak · Twin', 'Macallan 12 Tahun Sherry Oak · Twin', 990, 'Whisky', 'Wiski', 'S06'],
   ['spirits', 'Hennessy VSOP · Single', 'Hennessy VSOP · Single', 480, 'Brandy', 'Brendi', 'S10'],
   ['spirits', 'Hennessy VSOP · Twin', 'Hennessy VSOP · Twin', 880, 'Brandy', 'Brendi', 'S10'],
-  ['spirits', 'Martell VSOP · Single', 'Martell VSOP · Single', 680, 'Brandy', 'Brendi', 'S11'],
-  ['spirits', 'Martell VSOP · Twin', 'Martell VSOP · Twin', 1180, 'Brandy', 'Brendi', 'S11'],
-  ['spirits', 'Martell Cordon Bleu · Single', 'Martell Cordon Bleu · Single', 1180, 'Brandy', 'Brendi', 'S12'],
-  ['spirits', 'Martell Cordon Bleu · Twin', 'Martell Cordon Bleu · Twin', 2280, 'Brandy', 'Brendi', 'S12'],
+  ['spirits', 'Martell VSOP · Single', 'Martell VSOP · Single', 580, 'Brandy', 'Brendi', 'S11'],
+  ['spirits', 'Martell VSOP · Twin', 'Martell VSOP · Twin', 990, 'Brandy', 'Brendi', 'S11'],
+  ['spirits', 'Martell Cordon Bleu · Single', 'Martell Cordon Bleu · Single', 980, 'Brandy', 'Brendi', 'S12'],
+  ['spirits', 'Martell Cordon Bleu · Twin', 'Martell Cordon Bleu · Twin', 1888, 'Brandy', 'Brendi', 'S12'],
   ['spirits', 'Roku Suntory Japanese Gin · Single', 'Roku Suntory Gin Jepun · Single', 468, 'Gin', 'Gin', 'S14'],
   ['spirits', 'Roku Suntory Japanese Gin · Twin', 'Roku Suntory Gin Jepun · Twin', 760, 'Gin', 'Gin', 'S14'],
 ].map(([category, name, bm, price, description = '', descriptionBm = '', tag = '', image = '']) => ({
@@ -217,7 +229,9 @@ export const storedDrinkCatalog = [...new Map(menuSeed
 
 function addCalendarMonth(timestamp) { const date = new Date(timestamp); date.setMonth(date.getMonth() + 1); return date.getTime() }
 
+const currentMenuRevision = 1
 const initialState = {
+  menuRevision: currentMenuRevision,
   songs: [
     { id: 's-1', title: 'Just the Two of Us', artist: 'Bill Withers', table: '08', dedication: 'For my wife ❤️', status: 'pending', createdAt: Date.now() - 240000 },
     { id: 's-2', title: 'Bila Cinta Didusta', artist: 'Screen', table: '05', dedication: '', status: 'pending', createdAt: Date.now() - 190000 },
@@ -252,15 +266,33 @@ const initialState = {
 }
 
 const STORE_KEY = 'malam-demo-v2'
+const newMenuTags = new Set(['F15', 'F16', 'F17', 'F18', 'F19', 'F20', 'F21', 'BB02', 'S06'])
+const revisedSpiritTags = new Set(['S05', 'S11', 'S12'])
+
+function refreshDemoMenu(menu, menuById) {
+  const updated = menu.filter(item => item.eventId || !(
+    (item.category === 'cocktails' && item.name === 'Dry Martini') ||
+    (item.category === 'soft' && item.name === 'Cranberry Juice')
+  )).map(item => {
+    const seed = menuById.get(item.id)
+    return !item.eventId && seed && seed.name === item.name && revisedSpiritTags.has(seed.tag)
+      ? { ...item, price: seed.price }
+      : item
+  })
+  const ids = new Set(updated.map(item => item.id))
+  return [...updated, ...menuSeed.filter(item => newMenuTags.has(item.tag) && !ids.has(item.id))]
+}
+
 function readState() {
   try {
     const value = JSON.parse(localStorage.getItem(STORE_KEY))
     if (!value) return structuredClone(initialState)
     const menuById = new Map(menuSeed.map(item => [item.id, item]))
-    const menu = Array.isArray(value.menu) ? value.menu.map(item => { if (item.eventId) return { ...item, image: eventFood.find(seed => seed.id === item.id)?.image || item.image || '' }; const canonical = menuById.get(item.id) || menuSeed.find(seed => seed.category === item.category && seed.name === item.name && seed.description === item.description); return { ...item, id: canonical?.id || item.id, image: menuPhoto({ category: item.category, name_en: item.name, image_url: item.image || canonical?.image || '' }) } }) : initialState.menu
+    const storedMenu = Array.isArray(value.menu) ? value.menu.map(item => { if (item.eventId) return { ...item, image: menuPhoto({ event_id: item.eventId, category: item.category, name_en: item.name, image_url: item.image || '' }) }; const canonical = menuById.get(item.id) || menuSeed.find(seed => seed.category === item.category && seed.name === item.name && seed.description === item.description); return { ...item, id: canonical?.id || item.id, image: menuPhoto({ category: item.category, name_en: item.name, image_url: item.image || canonical?.image || '' }) } }) : initialState.menu
+    const menu = (value.menuRevision ?? 0) < currentMenuRevision ? refreshDemoMenu(storedMenu, menuById) : storedMenu
     const needsDemoStorageMigration = !Array.isArray(value.storedBatches) && (value.members || []).some((member) => member.id === 'm-1')
     const legacyStoredBalances = value.legacyStoredBalances || (!Array.isArray(value.storedBatches) ? Object.fromEntries((value.members || []).filter((member) => member.beer > 0 && !(needsDemoStorageMigration && member.id === 'm-1')).map((member) => [member.id, member.beer])) : {})
-    return { ...structuredClone(initialState), ...value, menu: [...menu, ...eventFood.filter(seed => !menu.some(item => item.id === seed.id))], legacyStoredBalances, storedBatches: value.storedBatches || (needsDemoStorageMigration ? structuredClone(initialState.storedBatches) : []), storedTransactions: value.storedTransactions || (needsDemoStorageMigration ? structuredClone(initialState.storedTransactions) : []) }
+    return { ...structuredClone(initialState), ...value, menuRevision: currentMenuRevision, menu: [...menu, ...eventFood.filter(seed => !menu.some(item => item.id === seed.id))], legacyStoredBalances, storedBatches: value.storedBatches || (needsDemoStorageMigration ? structuredClone(initialState.storedBatches) : []), storedTransactions: value.storedTransactions || (needsDemoStorageMigration ? structuredClone(initialState.storedTransactions) : []) }
   } catch { return structuredClone(initialState) }
 }
 function writeState(state) { localStorage.setItem(STORE_KEY, JSON.stringify(state)) }
@@ -526,6 +558,54 @@ export async function saveMenuAvailability(id, available) {
   if (!isLive) return mutateState((s) => { const row = s.menu.find((x) => x.id === id); if (row) row.available = available })
   const { error } = await supabase.from('menu_items').update({ available }).eq('id', id)
   if (error) throw error
+}
+
+export const menuCategories = { mains: 'Main courses', bites: 'Side dishes', draught: 'Draught beer', bottle: 'Bottled beer', cocktails: 'Cocktails', mocktails: 'Mocktails', soft: 'Non-alcoholic drinks', spirits: 'Spirits' }
+
+export function validateMenuPhoto(file) {
+  if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Choose a JPG, PNG or WebP photo.')
+  if (!file.size || file.size > 10 * 1024 * 1024) throw new Error('Choose a photo smaller than 10 MB that is not empty.')
+}
+
+export async function uploadMenuPhoto(file) {
+  validateMenuPhoto(file)
+  // Decode and re-encode to strip metadata and keep menu downloads small.
+  const bitmap = await createImageBitmap(file).catch(() => { throw new Error('This photo could not be opened. Choose another JPG, PNG or WebP.') })
+  let blob
+  try {
+    const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale)); canvas.height = Math.max(1, Math.round(bitmap.height * scale))
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.82))
+  } finally { bitmap.close() }
+  if (!blob || blob.size > 2 * 1024 * 1024) throw new Error('The photo is too large after resizing. Choose a smaller photo.')
+  if (!isLive) return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error('Could not read the photo. Try again.')); reader.readAsDataURL(blob) })
+  const extension = blob.type === 'image/webp' ? 'webp' : 'png'
+  const path = `${uid()}.${extension}`
+  const { error } = await supabase.storage.from('menu-photos').upload(path, blob, { contentType: blob.type, cacheControl: '31536000', upsert: false })
+  if (error) throw new Error('Could not upload the photo. Check your connection, menu access and menu photo storage setup, then try again.')
+  return supabase.storage.from('menu-photos').getPublicUrl(path).data.publicUrl
+}
+
+export async function saveMenuItem(input) {
+  const name = String(input.name || '').trim()
+  const price = Number(input.price)
+  if (!name || name.length > 120) throw new Error('Enter an item name with 1–120 characters.')
+  if (!Object.hasOwn(menuCategories, input.category)) throw new Error('Choose a menu category.')
+  if (String(input.price).trim() === '' || !Number.isFinite(price) || price < 0 || price > 9999999.99 || Math.abs(price * 100 - Math.round(price * 100)) > 0.000001) throw new Error('Enter a price from RM0 to RM9,999,999.99 with up to two decimal places.')
+  const item = { name, bm: String(input.bm || '').trim() || name, category: input.category, price, description: String(input.description || '').trim(), descriptionBm: String(input.descriptionBm || '').trim(), tag: String(input.tag || '').trim(), image: input.image || '', eventId: input.eventId || null, available: input.available !== false }
+  if (!isLive) return mutateState(s => {
+    if (s.menu.some(row => row.id !== input.id && row.category === item.category && row.name === name && row.description === item.description)) throw new Error('This item already exists. Use a different name or serving description.')
+    if (input.id) { const row = s.menu.find(row => row.id === input.id); if (!row) throw new Error('This item no longer exists. Refresh the menu.'); Object.assign(row, item); return row }
+    const row = { ...item, id: uid() }; s.menu.push(row); return row
+  })
+  const row = { name_en: item.name, name_bm: item.bm, category: item.category, price, description_en: item.description, description_bm: item.descriptionBm, image_url: item.image, tag: item.tag, event_id: item.eventId, available: item.available }
+  const query = input.id ? supabase.from('menu_items').update(row).eq('id', input.id) : supabase.from('menu_items').insert(row)
+  const { data, error } = await query.select('id').single()
+  if (error?.code === '23505') throw new Error('This item already exists. Use a different name or serving description.')
+  if (error || !data) throw new Error('Could not save the item. Check your connection and menu access, then try again.')
+  return data
 }
 
 export async function savePermission(role, permissionKey, enabled) {
